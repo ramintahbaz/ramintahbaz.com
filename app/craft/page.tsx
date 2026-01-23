@@ -8,6 +8,7 @@ import AnimatedPage from '@/components/AnimatedPage';
 import { photoboomMetadata } from '@/app/page';
 import { essay01Metadata } from '@/app/essays/essay-01/page';
 import { essay02Metadata } from '@/app/essays/essay-02/page';
+import { essay03Metadata } from '@/app/essays/essay-03/page';
 import { paymentStatusMetadata } from '@/app/paymentstatus/page';
 import { visualSystemHoverMetadata } from '@/app/visual-system-hover/page';
 import { carouselMetadata } from '@/app/interactions/carousel/page';
@@ -18,6 +19,7 @@ import { doritosLoadedMetadata } from '@/app/products/doritos-loaded/page';
 import { craftMetadata } from '@/app/products/craft/page';
 import { sunsetMetadata } from '@/app/products/sunset/page';
 import { thisTrackisCrackMetadata } from '@/app/products/thistrackiscrack/page';
+import { aiDocumentVerificationMetadata } from '@/app/products/ai-document-verification/page';
 import { film01Metadata } from '@/app/films/film-01/page';
 import { film02Metadata } from '@/app/films/film-02/page';
 import { film03Metadata } from '@/app/films/film-03/page';
@@ -120,6 +122,13 @@ const products: WorkItem[] = [
     description: thisTrackisCrackMetadata.cardDescription,
     href: thisTrackisCrackMetadata.href,
   },
+  {
+    id: aiDocumentVerificationMetadata.id,
+    date: aiDocumentVerificationMetadata.cardDate,
+    title: aiDocumentVerificationMetadata.title,
+    description: aiDocumentVerificationMetadata.cardDescription,
+    href: aiDocumentVerificationMetadata.href,
+  },
 ];
 
 const films: WorkItem[] = [
@@ -174,6 +183,13 @@ const essays: WorkItem[] = [
     title: essay02Metadata.title,
     description: essay02Metadata.cardDescription,
     href: essay02Metadata.href,
+  },
+  {
+    id: essay03Metadata.id,
+    date: essay03Metadata.cardDate,
+    title: essay03Metadata.title,
+    description: essay03Metadata.cardDescription,
+    href: essay03Metadata.href,
   },
 ];
 

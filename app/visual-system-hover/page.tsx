@@ -68,7 +68,7 @@ const gridItems: GridItem[] = [
     category: 'WD',
     bgColor: 'rgba(42, 42, 42, 0.5)',
     image: '/images/image4.jpeg',
-    video: '/videos/Fred Rogers.mp4',
+    video: '/videos/Mr_Rogers.mp4',
   },
 ];
 
