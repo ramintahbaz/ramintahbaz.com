@@ -10,6 +10,7 @@
     "compress-videos": "node scripts/compress-videos.js"
   },
   "dependencies": {
+    "@splinetool/react-spline": "^4.1.0",
     "bloom-menu": "^0.1.0",
     "framer-motion": "^12.23.26",
     "next": "16.0.10",

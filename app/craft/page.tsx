@@ -14,6 +14,7 @@ import { visualSystemHoverMetadata } from '@/app/visual-system-hover/page';
 import { carouselMetadata } from '@/app/interactions/carousel/page';
 import { electricBorderMetadata } from '@/app/interactions/electric-border/page';
 import { bloomMetadata } from '@/app/interactions/bloom/page';
+import { splineMetadata } from '@/app/interactions/spline/page';
 import { keycadetsMetadata } from '@/app/products/keycadets/page';
 import { doritosLoadedMetadata } from '@/app/products/doritos-loaded/page';
 import { craftMetadata } from '@/app/products/craft/page';
@@ -78,6 +79,13 @@ const fragments: WorkItem[] = [
     title: bloomMetadata.title,
     description: bloomMetadata.cardDescription,
     href: bloomMetadata.href,
+  },
+  {
+    id: splineMetadata.id,
+    date: splineMetadata.cardDate,
+    title: splineMetadata.title,
+    description: splineMetadata.cardDescription,
+    href: splineMetadata.href,
   },
 ].sort((a, b) => {
   // Sort by date descending (most recent first)
