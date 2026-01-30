@@ -133,6 +133,7 @@ export default function SplinePage() {
               }}
             >
               {scriptLoaded ? (
+                // @ts-ignore - spline-viewer is a custom web component
                 <spline-viewer
                   url="https://prod.spline.design/6I6XxvKovDyeAwTs/scene.splinecode"
                   style={{ 
