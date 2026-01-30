@@ -21,21 +21,11 @@ export default function SplinePage() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Detect mobile and adjust quality
+  // Detect mobile
   useEffect(() => {
     const checkMobile = () => {
       const isMobileDevice = window.innerWidth < 640;
       setIsMobile(isMobileDevice);
-      
-      // Adjust iframe quality for mobile
-      if (iframeRef.current) {
-        const iframe = iframeRef.current;
-        // Force hardware acceleration and better rendering on mobile
-        if (isMobileDevice) {
-          iframe.style.imageRendering = 'crisp-edges';
-          iframe.style.WebkitImageRendering = 'crisp-edges';
-        }
-      }
     };
 
     checkMobile();
@@ -143,9 +133,8 @@ export default function SplinePage() {
                 WebkitBackfaceVisibility: 'hidden',
                 WebkitTransform: 'scale3d(1.6, 1.6, 1) translate3d(0, 15%, 0)',
                 transformStyle: 'preserve-3d',
-                WebkitImageRendering: 'auto',
                 pointerEvents: 'none',
-              }}
+              } as React.CSSProperties}
             />
             {/* Bottom border/frame to create intentional boundary */}
             <div 
