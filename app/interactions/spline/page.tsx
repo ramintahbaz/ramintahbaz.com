@@ -16,10 +16,34 @@ export const splineMetadata = {
 };
 
 export default function SplinePage() {
-  const iframeContainerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [scriptLoaded, setScriptLoaded] = useState(false);
+
+  // Load Spline viewer script
+  useEffect(() => {
+    // Check if script is already loaded
+    if (customElements.get('spline-viewer')) {
+      setScriptLoaded(true);
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.type = 'module';
+    script.src = 'https://unpkg.com/@splinetool/viewer@1.12.43/build/spline-viewer.js';
+    script.async = true;
+    script.onload = () => {
+      setScriptLoaded(true);
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, []);
 
   // Detect mobile
   useEffect(() => {
@@ -33,7 +57,7 @@ export default function SplinePage() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Allow page scrolling when hovering over iframe
+  // Allow page scrolling when hovering over animation
   useEffect(() => {
     const overlay = overlayRef.current;
     if (!overlay) return;
@@ -50,12 +74,17 @@ export default function SplinePage() {
       }
     };
 
-    // For mobile, we rely on touchAction: 'pan-y' CSS property for native scrolling
-    // No manual touch handling needed - the browser will handle it natively
-
-    // No need to handle mouse down since iframe is not interactive
+    const handleTouchStart = (e: TouchEvent) => {
+      // If multi-touch (pinch), let it pass through to spline-viewer
+      if (e.touches.length > 1) {
+        // Don't prevent multi-touch - let spline-viewer handle it
+        return;
+      }
+      // Single touch - allow page scrolling via touchAction
+    };
 
     overlay.addEventListener('wheel', handleWheel, { passive: false });
+    // Don't add touchstart listener - let touchAction handle it
 
     return () => {
       overlay.removeEventListener('wheel', handleWheel);
@@ -75,78 +104,77 @@ export default function SplinePage() {
 
   return (
     <AnimatedPage variant="dramatic">
-      <ProjectPageShell
-        title={splineMetadata.title}
-        date={splineMetadata.date}
-        description={description}
-        backHref="/craft"
-        backLabel="Craft"
-        shareConfig={{
-          title: splineMetadata.shareTitle,
-          text: splineMetadata.shareText,
-        }}
-        extraSpacing={-16}
-      >
-        <div className="w-full max-w-[680px] mx-auto relative px-4 sm:px-0" style={{ overflow: 'hidden' }}>
-          <div 
-            ref={iframeContainerRef}
-            className="w-full rounded-lg overflow-hidden bg-gray-100 relative mt-8 sm:mt-12" 
-            style={{ 
-              overflow: 'hidden',
-              transform: 'translateZ(0)',
-              willChange: 'transform',
-              height: '600px',
-              WebkitTransform: 'translateZ(0)',
-              WebkitBackfaceVisibility: 'hidden',
-              backfaceVisibility: 'hidden',
-              touchAction: 'pan-y',
-            }}
-          >
-            {/* Top border/frame to create intentional boundary */}
+        <ProjectPageShell
+          title={splineMetadata.title}
+          date={splineMetadata.date}
+          description={description}
+          backHref="/craft"
+          backLabel="Craft"
+          shareConfig={{
+            title: splineMetadata.shareTitle,
+            text: splineMetadata.shareText,
+          }}
+          extraSpacing={-16}
+        >
+          <div className="w-full max-w-[680px] mx-auto relative px-4 sm:px-0" style={{ overflow: 'hidden' }}>
             <div 
-              className="absolute top-0 left-0 right-0 h-1 pointer-events-none z-10"
-              style={{ borderRadius: '0.5rem', backgroundColor: '#0E1014' }}
-            />
-            {/* Transparent overlay to capture scroll events while allowing clicks through */}
-            <div 
-              ref={overlayRef}
-              className="absolute inset-0 z-30"
+              ref={containerRef}
+              className="w-full rounded-lg overflow-hidden relative mt-8 sm:mt-12" 
               style={{ 
-                pointerEvents: 'auto',
-                cursor: 'default',
-                touchAction: 'pan-y',
-              }}
-            />
-            <iframe
-              ref={iframeRef}
-              src="https://my.spline.design/promise1-XHxvyba8ET1rLcT2QmEJJxu0/"
-              title="Spline 3D Scene"
-              className="w-full h-full"
-              allow="fullscreen"
-              style={{ 
-                border: 'none', 
-                transform: 'scale(1.6) translateY(15%)', 
-                transformOrigin: 'center',
-                imageRendering: '-webkit-optimize-contrast',
+                overflow: 'hidden',
+                transform: 'translateZ(0)',
                 willChange: 'transform',
-                backfaceVisibility: 'hidden',
+                height: isMobile ? '450px' : '600px',
+                WebkitTransform: 'translateZ(0)',
                 WebkitBackfaceVisibility: 'hidden',
-                WebkitTransform: 'scale3d(1.6, 1.6, 1) translate3d(0, 15%, 0)',
-                transformStyle: 'preserve-3d',
-                pointerEvents: 'none',
-              } as React.CSSProperties}
-            />
-            {/* Bottom border/frame to create intentional boundary */}
-            <div 
-              className="absolute bottom-0 left-0 right-0 h-12 pointer-events-none z-10"
-              style={{ borderRadius: '0.5rem', backgroundColor: '#0E1014' }}
-            />
+                backfaceVisibility: 'hidden',
+                touchAction: 'pan-y',
+                backgroundColor: '#0E1014',
+              }}
+            >
+              {scriptLoaded ? (
+                <spline-viewer
+                  url="https://prod.spline.design/6I6XxvKovDyeAwTs/scene.splinecode"
+                  style={{ 
+                    width: '100%', 
+                    height: '100%',
+                    transform: isMobile ? 'scale(1.1) translateY(10%)' : 'scale(1.6) translateY(15%)', 
+                    transformOrigin: 'center',
+                    willChange: 'transform',
+                    backfaceVisibility: 'hidden',
+                    WebkitBackfaceVisibility: 'hidden',
+                    WebkitTransform: isMobile 
+                      ? 'scale3d(1.1, 1.1, 1) translate3d(0, 10%, 0)' 
+                      : 'scale3d(1.6, 1.6, 1) translate3d(0, 15%, 0)',
+                    transformStyle: 'preserve-3d',
+                    pointerEvents: 'auto',
+                    touchAction: 'pan-y pinch-zoom',
+                    display: 'block',
+                    position: 'relative',
+                    zIndex: 20,
+                  } as React.CSSProperties}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: '#0E1014' }}>
+                  <p className="text-gray-500">Loading 3D scene...</p>
+                </div>
+              )}
+              {/* Transparent overlay to capture scroll events while allowing multi-touch for zoom */}
+              <div 
+                ref={overlayRef}
+                className="absolute inset-0 z-30"
+                style={{ 
+                  pointerEvents: 'auto',
+                  cursor: 'default',
+                  touchAction: 'pan-y pinch-zoom',
+                }}
+              />
+            </div>
+            {/* Spacer for bottom padding */}
+            <div className="h-2 sm:h-4" />
           </div>
-          {/* Spacer for bottom padding */}
-          <div className="h-2 sm:h-4" />
-        </div>
-      </ProjectPageShell>
-    </AnimatedPage>
+        </ProjectPageShell>
+      </AnimatedPage>
   );
 }
 

@@ -348,10 +348,10 @@ export default function CraftPage() {
           >
             <div className="text-[16px] sm:text-[17px] text-gray-700 leading-relaxed max-w-[560px] mx-auto space-y-3 sm:space-y-4">
               <p>
-                I practice my craft through product, film, hardware, and writing. Each form offers a different way to tell a story.
+                I&apos;m a design engineer who practices across product, film, hardware, and writing. Each form offers a different way to tell a story.
               </p>
               <p>
-                I&apos;m entirely self-taught, learning by doing over years of practice.
+                I learn by doing, building and iterating through hands-on work and continuous exploration.
               </p>
               <p>
                 This is a curated collection of my work I&apos;m proud to share.
