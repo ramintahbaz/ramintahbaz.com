@@ -30,7 +30,7 @@ export default function Home() {
                   I create across product, film, hardware, and writing. This is where I share the work and what I&apos;m learning along the way.
                 </p>
                 <p>
-                  Currently head of design at{' '}
+                  Currently at{' '}
                   <Link
                     href="https://joinpromise.com"
                     target="_blank"
@@ -39,7 +39,7 @@ export default function Home() {
                   >
                     Promise
                   </Link>
-                  , designing intelligent financial systems that work for people.
+                  , building intelligent financial systems that work for millions of people.
                 </p>
               </div>
               

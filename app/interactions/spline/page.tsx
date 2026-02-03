@@ -1,94 +1,32 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import AnimatedPage from '@/components/AnimatedPage';
 import ProjectPageShell from '@/components/ProjectPageShell';
 
 export const splineMetadata = {
   id: 'spline',
-  title: 'Data wave animation',
+  title: 'Promise in motion',
   date: 'March 2025',
   cardDate: 'Mar 2025',
-  cardDescription: 'A 3D brand asset visualizing data flow across Promise\'s platform with hidden easter eggs.',
+  cardDescription: '3D brand asset showing data moving through Promise\'s systems.',
   href: '/interactions/spline',
-  shareTitle: 'Data wave animation — Ramin — Designer',
+  shareTitle: 'Promise in motion — Ramin — Designer',
   shareText: 'A custom 3D brand asset built in Spline that visualizes data flowing through Promise\'s product ecosystem.',
 };
 
 export default function SplinePage() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const overlayRef = useRef<HTMLDivElement>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [scriptLoaded, setScriptLoaded] = useState(false);
 
-  // Load Spline viewer script
-  useEffect(() => {
-    // Check if script is already loaded
-    if (customElements.get('spline-viewer')) {
-      setScriptLoaded(true);
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.type = 'module';
-    script.src = 'https://unpkg.com/@splinetool/viewer@1.12.43/build/spline-viewer.js';
-    script.async = true;
-    script.onload = () => {
-      setScriptLoaded(true);
-    };
-    document.body.appendChild(script);
-
-    return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
-    };
-  }, []);
-
-  // Detect mobile
   useEffect(() => {
     const checkMobile = () => {
-      const isMobileDevice = window.innerWidth < 640;
-      setIsMobile(isMobileDevice);
+      setIsMobile(window.innerWidth < 640);
     };
-
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  // Allow page scrolling when hovering over animation
-  useEffect(() => {
-    const overlay = overlayRef.current;
-    if (!overlay) return;
-
-    const handleWheel = (e: WheelEvent) => {
-      // Always allow page scrolling when scrolling vertically
-      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-        window.scrollBy({
-          top: e.deltaY,
-          behavior: 'auto'
-        });
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    };
-
-    const handleTouchStart = (e: TouchEvent) => {
-      // If multi-touch (pinch), let it pass through to spline-viewer
-      if (e.touches.length > 1) {
-        // Don't prevent multi-touch - let spline-viewer handle it
-        return;
-      }
-      // Single touch - allow page scrolling via touchAction
-    };
-
-    overlay.addEventListener('wheel', handleWheel, { passive: false });
-    // Don't add touchstart listener - let touchAction handle it
-
-    return () => {
-      overlay.removeEventListener('wheel', handleWheel);
-    };
   }, []);
 
   const description = (
@@ -116,66 +54,85 @@ export default function SplinePage() {
           }}
           extraSpacing={-16}
         >
-          <div className="w-full max-w-[680px] mx-auto relative px-4 sm:px-0" style={{ overflow: 'hidden' }}>
+          {/* Video */}
+          <div className="mt-4 sm:mt-16 w-full max-w-full -mx-4 sm:mx-0">
             <div 
-              ref={containerRef}
-              className="w-full rounded-lg overflow-hidden relative mt-8 sm:mt-12" 
-              style={{ 
-                overflow: 'hidden',
-                transform: 'translateZ(0)',
-                willChange: 'transform',
-                height: isMobile ? '450px' : '600px',
-                WebkitTransform: 'translateZ(0)',
-                WebkitBackfaceVisibility: 'hidden',
-                backfaceVisibility: 'hidden',
-                touchAction: 'pan-y',
-                backgroundColor: '#0E1014',
-              }}
+              className="relative w-full rounded-lg overflow-hidden min-h-[270px] sm:min-h-[400px]" 
+              style={{ maxHeight: 'calc(100vh - 200px)', backgroundColor: '#0E1014', cursor: isMobile ? 'default' : 'pointer' }}
+              onClick={() => !isMobile && setIsModalOpen(true)}
             >
-              {scriptLoaded ? (
-                // @ts-ignore - spline-viewer is a custom web component
-                <spline-viewer
-                  url="https://prod.spline.design/6I6XxvKovDyeAwTs/scene.splinecode"
-                  style={{ 
-                    width: '100%', 
-                    height: '100%',
-                    transform: isMobile ? 'scale(1.1) translateY(10%)' : 'scale(1.6) translateY(15%)', 
-                    transformOrigin: 'center',
-                    willChange: 'transform',
-                    backfaceVisibility: 'hidden',
-                    WebkitBackfaceVisibility: 'hidden',
-                    WebkitTransform: isMobile 
-                      ? 'scale3d(1.1, 1.1, 1) translate3d(0, 10%, 0)' 
-                      : 'scale3d(1.6, 1.6, 1) translate3d(0, 15%, 0)',
-                    transformStyle: 'preserve-3d',
-                    pointerEvents: 'auto',
-                    touchAction: 'pan-y pinch-zoom',
-                    display: 'block',
-                    position: 'relative',
-                    zIndex: 20,
-                  } as React.CSSProperties}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: '#0E1014' }}>
-                  <p className="text-gray-500">Loading 3D scene...</p>
-                </div>
-              )}
-              {/* Transparent overlay to capture scroll events while allowing multi-touch for zoom */}
-              <div 
-                ref={overlayRef}
-                className="absolute inset-0 z-30"
-                style={{ 
-                  pointerEvents: 'auto',
-                  cursor: 'default',
-                  touchAction: 'pan-y pinch-zoom',
-                }}
+              <video
+                src="/images/data wave/promise-1080p_5seconds.mp4"
+                className="w-full h-full object-contain rounded-lg"
+                style={{ pointerEvents: 'none', objectPosition: 'center bottom', transform: `translateY(${isMobile ? '20%' : '15%'})` }}
+                muted
+                loop
+                playsInline
+                autoPlay
+                disablePictureInPicture
+                controlsList="nodownload nofullscreen noremoteplayback"
               />
             </div>
-            {/* Spacer for bottom padding */}
-            <div className="h-2 sm:h-4" />
           </div>
+
+          {/* Modal */}
+          <AnimatePresence>
+            {isModalOpen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 flex items-center justify-center p-6 sm:p-12"
+                onClick={() => setIsModalOpen(false)}
+              >
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  className="relative w-[90vw] sm:w-[95vw] max-w-[90vw] sm:max-w-[95vw] h-auto max-h-[70vh] sm:max-h-[90vh] aspect-video flex items-center justify-center bg-[#0E1014] rounded-lg shadow-lg"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="relative w-full h-full rounded-lg overflow-hidden">
+                    <video
+                      src="/images/data wave/promise-1080p_5seconds.mp4"
+                      className="w-full h-full object-contain rounded-lg"
+                      style={{ objectPosition: 'center bottom', transform: 'translateY(15%)' }}
+                      muted
+                      loop
+                      playsInline
+                      autoPlay
+                      disablePictureInPicture
+                      controlsList="nodownload nofullscreen noremoteplayback"
+                    />
+                  </div>
+                  {/* Close button - positioned on top of video */}
+                  <button
+                    onClick={() => setIsModalOpen(false)}
+                    className="absolute right-2 sm:right-3 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-black/80 hover:bg-black text-white transition-colors z-[100] cursor-pointer shadow-lg"
+                    style={{ top: 'calc(0.5rem + 2px)' }}
+                    aria-label="Close modal"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </button>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </ProjectPageShell>
       </AnimatedPage>
   );
 }
-
