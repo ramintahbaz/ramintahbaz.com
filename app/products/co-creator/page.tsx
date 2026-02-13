@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AnimatedPage from '@/components/AnimatedPage';
 import ProjectPageShell from '@/components/ProjectPageShell';
+
+const VIDEO_SRC = '/images/co-creator/taste%20%E2%86%92%20system%20demo.mp4';
 
 export const coCreatorMetadata = {
   id: 'co-creator',
@@ -19,6 +21,11 @@ export const coCreatorMetadata = {
 export default function CoCreatorPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [modalSize, setModalSize] = useState({ width: 800, height: 450 });
+  const [modalStartTime, setModalStartTime] = useState(0);
+  const inlineVideoRef = useRef<HTMLVideoElement>(null);
+  const modalVideoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -29,10 +36,72 @@ export default function CoCreatorPage() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  const openModal = () => {
+    if (isMobile) return;
+    const el = containerRef.current;
+    const video = inlineVideoRef.current;
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      const maxW = window.innerWidth * 0.9;
+      const maxH = window.innerHeight;
+      let w = rect.width * 2;
+      let h = rect.height * 2;
+      if (video && video.videoWidth && video.videoHeight) {
+        const videoAspect = video.videoWidth / video.videoHeight;
+        const containerAspect = rect.width / rect.height;
+        let displayW = rect.width;
+        let displayH = rect.height;
+        if (videoAspect > containerAspect) {
+          displayH = rect.width / videoAspect;
+        } else {
+          displayW = rect.height * videoAspect;
+        }
+        w = Math.min(displayW * 2, maxW);
+        h = Math.min(displayH * 2, maxH);
+      } else {
+        w = Math.min(w, maxW);
+        h = Math.min(h, maxH);
+      }
+      setModalSize({ width: w, height: h });
+    }
+    setModalStartTime(inlineVideoRef.current?.currentTime ?? 0);
+    inlineVideoRef.current?.pause();
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    const modalTime = modalVideoRef.current?.currentTime;
+    modalVideoRef.current?.pause();
+    if (inlineVideoRef.current != null && typeof modalTime === 'number') {
+      inlineVideoRef.current.currentTime = modalTime;
+    }
+    inlineVideoRef.current?.play();
+    setIsModalOpen(false);
+  };
+
+  useEffect(() => {
+    if (!isModalOpen) return;
+    const video = modalVideoRef.current;
+    if (!video) return;
+    const seekAndPlay = () => {
+      video.currentTime = modalStartTime;
+      video.play();
+    };
+    if (video.readyState >= 2) {
+      seekAndPlay();
+    } else {
+      video.addEventListener('loadeddata', seekAndPlay, { once: true });
+      return () => video.removeEventListener('loadeddata', seekAndPlay);
+    }
+  }, [isModalOpen, modalStartTime]);
+
   const description = (
     <>
       <p className="mb-2 sm:mb-3">
-        What if design inspiration started anywhere, like it naturally does? You see something in a bazaar that catches your eye and think &quot;that would be perfect for the product I&apos;m building.&quot; You capture it, bring it to your canvas, describe what you love about it, and a complete system builds from your vision. What if your taste could scale faster than you could execute it yourself?
+        What if design inspiration started anywhere, like it naturally does? You see something in a bazaar that catches your eye and think &quot;that would be perfect for the product I&apos;m building.&quot; You capture it, bring it to your canvas, describe what you love about it, and a complete system builds from your vision.
+      </p>
+      <p className="mb-2 sm:mb-3">
+        What if your taste could scale faster than you could execute it yourself?
       </p>
     </>
   );
@@ -52,13 +121,15 @@ export default function CoCreatorPage() {
       >
         {/* Video */}
         <div className="mt-4 sm:mt-16 w-full max-w-full -mx-4 sm:mx-0">
-          <div 
-            className="relative w-full rounded-lg overflow-hidden min-h-[500px] sm:min-h-[800px]" 
+          <div
+            ref={containerRef}
+            className="relative w-full rounded-lg overflow-hidden min-h-[500px] sm:min-h-[800px]"
             style={{ maxHeight: 'calc(100vh - 200px)', backgroundColor: '#E2DEDB', cursor: isMobile ? 'default' : 'pointer' }}
-            onClick={() => !isMobile && setIsModalOpen(true)}
+            onClick={openModal}
           >
             <video
-              src="/images/co-creator/taste%20%E2%86%92%20system%20demo.mp4"
+              ref={inlineVideoRef}
+              src={VIDEO_SRC}
               className="w-full h-full object-contain rounded-lg"
               style={{ pointerEvents: 'none' }}
               muted
@@ -71,56 +142,48 @@ export default function CoCreatorPage() {
           </div>
         </div>
 
-        {/* Modal */}
+        {/* Modal - 2x size, video only with overlaid close */}
         <AnimatePresence>
           {isModalOpen && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-6 sm:p-12"
-              onClick={() => setIsModalOpen(false)}
+              className="fixed inset-0 z-50 flex items-center justify-center p-0"
+              onClick={closeModal}
             >
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
-                className="relative w-[90vw] sm:w-[600px] max-w-[90vw] sm:max-w-[600px] h-auto max-h-[70vh] sm:max-h-[500px] aspect-video flex items-center justify-center bg-[#E2DEDB] rounded-lg shadow-lg"
+                className="relative rounded-lg shadow-lg overflow-hidden bg-[#E2DEDB]"
+                style={{
+                  width: modalSize.width,
+                  height: modalSize.height,
+                  maxWidth: '90vw',
+                  maxHeight: '100vh',
+                }}
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="relative w-full h-full rounded-lg overflow-hidden">
-                  <video
-                    src="/images/co-creator/taste%20%E2%86%92%20system%20demo.mp4"
-                    className="w-full h-full object-contain rounded-lg"
-                    muted
-                    loop
-                    playsInline
-                    autoPlay
-                    disablePictureInPicture
-                    controlsList="nodownload nofullscreen noremoteplayback"
-                  />
-                </div>
-                {/* Close button - positioned on top of video */}
+                <video
+                  ref={modalVideoRef}
+                  src={VIDEO_SRC}
+                  className="w-full h-full object-contain rounded-lg"
+                  muted
+                  loop
+                  playsInline
+                  disablePictureInPicture
+                  controlsList="nodownload nofullscreen noremoteplayback"
+                />
                 <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="absolute right-2 sm:right-3 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-black/80 hover:bg-black text-white transition-colors z-[100] cursor-pointer shadow-lg"
-                  style={{ top: 'calc(0.5rem + 2px)' }}
+                  onClick={closeModal}
+                  className="absolute right-2 top-2 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-black/80 hover:bg-black text-white transition-colors z-10 cursor-pointer"
                   aria-label="Close modal"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
                   </svg>
                 </button>
               </motion.div>

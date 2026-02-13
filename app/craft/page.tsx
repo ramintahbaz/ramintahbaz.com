@@ -551,7 +551,7 @@ export default function CraftPage() {
             </div>
           </motion.section>
 
-          {/* Essays */}
+          {/* Writing */}
           <motion.section
             className="mb-10 sm:mb-12"
             variants={sectionVariants}
@@ -574,7 +574,7 @@ export default function CraftPage() {
           >
             <div className="flex items-baseline justify-between mb-8 max-w-[560px] mx-auto">
               <h2 className="text-[16px] font-medium text-black">
-                Essays
+                Writing
               </h2>
             </div>
 
