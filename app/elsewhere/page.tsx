@@ -34,7 +34,7 @@ export default function ElsewherePage() {
                   </p>
                   <p>
                     <a
-                      href="https://x.com/ramintahbaz"
+                      href="https://x.com/ratahbaz"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="underline underline-offset-2"
