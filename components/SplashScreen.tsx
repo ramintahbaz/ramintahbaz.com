@@ -84,7 +84,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
                     lineHeight: 1.5,
                   }}
                 >
-                  Design engineer based in Washington, DC.
+                  Product designer based in Washington, DC.
                 </motion.p>
               )}
             </AnimatePresence>

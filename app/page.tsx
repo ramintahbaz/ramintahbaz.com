@@ -13,21 +13,18 @@ export const photoboomMetadata = {
   shareText: 'An exploding image gallery interaction exploring motion as feedback.',
 };
 
-const MOBILE_BREAKPOINT = 768;
-
 export default function Home() {
-  const [splashDone, setSplashDone] = useState(() => {
-    if (typeof window === 'undefined') return true;
-    if (window.innerWidth >= MOBILE_BREAKPOINT) return true;
-    if (localStorage.getItem('leftForWork') === 'true') {
-      localStorage.removeItem('leftForWork');
-      return true;
-    }
-    return false;
-  });
+  const [splashDone, setSplashDone] = useState(false);
 
   useEffect(() => {
     (document.activeElement as HTMLElement)?.blur();
+  }, []);
+
+  useEffect(() => {
+    if (localStorage.getItem('leftForWork') === 'true') {
+      localStorage.removeItem('leftForWork');
+      setSplashDone(true);
+    }
   }, []);
 
   const handleComplete = useCallback(() => {

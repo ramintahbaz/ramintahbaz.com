@@ -296,7 +296,7 @@ export default function TopBar() {
         <Link href="https://www.linkedin.com/in/ramin-tahbaz/" target="_blank" rel="noopener noreferrer" className="shrink-0 hover:underline underline-offset-2">
           Connect
         </Link>
-        <span className="shrink-0 text-white/60 cursor-default">Resume</span>
+        <span className="shrink-0 text-white/60 cursor-default hidden">Resume</span>
         <Link
           href="https://x.com/ramintahbaz"
           target="_blank"
