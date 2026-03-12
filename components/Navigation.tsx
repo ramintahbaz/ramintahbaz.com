@@ -54,7 +54,7 @@ export default function Navigation() {
 
           {/* Right circular X profile button */}
           <Link
-            href="https://x.com/ratahbaz"
+            href="https://x.com/ramintahbaz"
             target="_blank"
             rel="noopener noreferrer"
             className="flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-colors overflow-hidden"
