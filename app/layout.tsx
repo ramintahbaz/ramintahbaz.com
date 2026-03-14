@@ -6,6 +6,7 @@ import Navigation from "@/components/Navigation";
 import TopBar from "@/components/TopBar";
 import HiddenMetadata from "@/components/HiddenMetadata";
 import { CategoryFilterProvider } from "@/contexts/CategoryFilterContext";
+import { SplashProvider } from "@/contexts/SplashContext";
 import NeuralPortfolioLayer from "@/app/NeuralPortfolioLayer";
 import "./globals.css";
 
@@ -130,13 +131,15 @@ export default async function RootLayout({
           }}
         />
         <CategoryFilterProvider>
-          <Suspense fallback={<div className="h-12 shrink-0" />}>
-            <TopBar />
-          </Suspense>
-          <div className="pt-12 bg-black min-h-screen min-h-[100dvh]">
-            <NeuralPortfolioLayer />
-            {children}
-          </div>
+          <SplashProvider>
+            <Suspense fallback={<div className="h-12 shrink-0" />}>
+              <TopBar />
+            </Suspense>
+            <div className="pt-12 bg-black min-h-screen min-h-[100dvh]">
+              <NeuralPortfolioLayer />
+              {children}
+            </div>
+          </SplashProvider>
         </CategoryFilterProvider>
 
         {/* Bottom Navbar (global, non-animated) — hidden for now */}

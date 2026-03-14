@@ -21,8 +21,8 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
     const t1 = setTimeout(() => setShowSecond(true), 1200);
     const t2 = setTimeout(() => {
       setVisible(false);
-    }, 4000);
-    const t3 = setTimeout(() => onComplete(), 4600);
+    }, 3100);
+    const t3 = setTimeout(() => onComplete(), 3700);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, [onComplete]);
 
@@ -84,7 +84,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
                     lineHeight: 1.5,
                   }}
                 >
-                  Product designer based in Washington, DC.
+                  Design engineer based in Washington, DC.
                 </motion.p>
               )}
             </AnimatePresence>

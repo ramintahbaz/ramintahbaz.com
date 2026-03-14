@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import SplashScreen from '@/components/SplashScreen';
+import { useSplash } from '@/contexts/SplashContext';
 
 export const photoboomMetadata = {
   id: 'photoboom',
@@ -15,6 +16,7 @@ export const photoboomMetadata = {
 
 export default function Home() {
   const [splashDone, setSplashDone] = useState(false);
+  const { setSplashDone: setSplashDoneContext } = useSplash();
 
   useEffect(() => {
     (document.activeElement as HTMLElement)?.blur();
@@ -24,12 +26,14 @@ export default function Home() {
     if (localStorage.getItem('leftForWork') === 'true') {
       localStorage.removeItem('leftForWork');
       setSplashDone(true);
+      setSplashDoneContext(true);
     }
-  }, []);
+  }, [setSplashDoneContext]);
 
   const handleComplete = useCallback(() => {
     setSplashDone(true);
-  }, []);
+    setSplashDoneContext(true);
+  }, [setSplashDoneContext]);
 
   return (
     <>

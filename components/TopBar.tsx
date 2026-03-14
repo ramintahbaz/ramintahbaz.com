@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import GitHubCommitBadge from '@/components/GitHubCommitBadge';
+import SignalIcon from '@/components/SignalIcon';
 
 // Washington, DC coordinates for Open-Meteo
 const DC_LAT = 38.9072;
@@ -110,22 +111,33 @@ export default function TopBar() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const view = (searchParams.get('view') === 'grid' ? 'grid' : 'neural') as 'neural' | 'grid';
+  const view = (searchParams.get('view') === 'neural' ? 'neural' : 'grid') as 'neural' | 'grid';
   const [mounted, setMounted] = useState(false);
+  const VIEW_TOGGLE_USED_KEY = 'viewToggleUsed';
+  const [viewToggleUsed, setViewToggleUsed] = useState(false);
+  const viewToggledByTouchRef = useRef(false);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const nav = performance.getEntriesByType?.('navigation')?.[0] as { type?: string } | undefined;
+    const isReload = nav?.type === 'reload';
+    if (isReload) {
+      sessionStorage.removeItem(VIEW_TOGGLE_USED_KEY);
+    } else if (sessionStorage.getItem(VIEW_TOGGLE_USED_KEY) === 'true') {
+      setViewToggleUsed(true);
+    }
+  }, []);
+  useEffect(() => {
+    if (view === 'neural' && typeof window !== 'undefined') {
+      sessionStorage.setItem(VIEW_TOGGLE_USED_KEY, 'true');
+      setViewToggleUsed(true);
+    }
+  }, [view]);
   const isProjectPage = pathname !== '/' && pathname !== '';
   const [weather, setWeather] = useState<WeatherState>(null);
   const [now, setNow] = useState(new Date());
   const [showWeatherTooltip, setShowWeatherTooltip] = useState(false);
   const [weatherTooltipPos, setWeatherTooltipPos] = useState<{ x: number; y: number } | null>(null);
   const weatherTriggerRef = useRef<HTMLSpanElement>(null);
-  const [viewIconShimmer, setViewIconShimmer] = useState(false);
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const mobile = window.innerWidth < 768;
-    if (mobile && !isProjectPage && sessionStorage.getItem('viewIconShimmerSeen') !== 'true') {
-      setViewIconShimmer(true);
-    }
-  }, [isProjectPage]);
   useLayoutEffect(() => {
     if (!showWeatherTooltip || !weatherTriggerRef.current) {
       setWeatherTooltipPos(null);
@@ -211,11 +223,13 @@ export default function TopBar() {
               sizes="32px"
             />
           </button>
-          <Link href="https://github.com/ramintahbaz23/" target="_blank" rel="noopener noreferrer" className="hover:underline underline-offset-2">
-            GitHub
+          <Link href="https://github.com/ramintahbaz23/" target="_blank" rel="noopener noreferrer" className="shrink-0 flex items-center hover:opacity-80" aria-label="GitHub">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/GitHub_Invertocat_White.svg" alt="" className="h-3.5 w-3.5" />
           </Link>
-          <Link href="https://www.linkedin.com/in/ramin-tahbaz/" target="_blank" rel="noopener noreferrer" className="hover:underline underline-offset-2">
-            Connect
+          <Link href="https://www.linkedin.com/in/ramin-tahbaz/" target="_blank" rel="noopener noreferrer" className="shrink-0 flex items-center hover:opacity-80" aria-label="LinkedIn">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/linkedin-icon.png" alt="" className="h-3.5 w-3.5" />
           </Link>
           <Link href="https://x.com/ramintahbaz" target="_blank" rel="noopener noreferrer" className="flex items-center hover:opacity-80" aria-label="X profile">
             <XLogo className="h-3.5 w-3.5" />
@@ -226,7 +240,20 @@ export default function TopBar() {
         {!isProjectPage && (
         <button
           type="button"
+          onTouchStartCapture={(e) => {
+            const next = view === 'neural' ? 'grid' : 'neural';
+            const params = new URLSearchParams(searchParams.toString());
+            params.set('view', next);
+            router.replace(`/?${params.toString()}`);
+            viewToggledByTouchRef.current = true;
+            e.preventDefault();
+            e.stopPropagation();
+          }}
           onClick={() => {
+            if (viewToggledByTouchRef.current) {
+              viewToggledByTouchRef.current = false;
+              return;
+            }
             const next = view === 'neural' ? 'grid' : 'neural';
             const params = new URLSearchParams(searchParams.toString());
             params.set('view', next);
@@ -236,26 +263,17 @@ export default function TopBar() {
           className="flex items-center gap-1 font-mono text-[11px] text-white/70 hover:text-white transition-colors pr-4"
           aria-label={view === 'neural' ? 'Switch to grid view' : 'Switch to network view'}
         >
-          <span
-            className="inline-flex items-center"
-            style={viewIconShimmer ? { animation: 'viewIconShimmer 1.2s ease-in-out 0.6s both' } : undefined}
-            onAnimationEnd={() => {
-              if (viewIconShimmer && typeof window !== 'undefined') {
-                sessionStorage.setItem('viewIconShimmerSeen', 'true');
-                setViewIconShimmer(false);
-              }
-            }}
-          >
-            {view === 'neural' ? (
-              <svg data-testid="geist-icon" height="16" width="16" viewBox="0 0 16 16" style={{ color: 'currentColor' }} strokeLinejoin="round">
-                <path fillRule="evenodd" clipRule="evenodd" d="M2.5 5.5V2.5H5.5V5.5H2.5ZM1 2C1 1.44772 1.44772 1 2 1H6C6.55228 1 7 1.44772 7 2V6C7 6.55228 6.55228 7 6 7H2C1.44772 7 1 6.55228 1 6V2ZM2.5 13.5V10.5H5.5V13.5H2.5ZM1 10C1 9.44772 1.44772 9 2 9H6C6.55228 9 7 9.44772 7 10V14C7 14.5523 6.55228 15 6 15H2C1.44772 15 1 14.5523 1 14V10ZM10.5 2.5V5.5H13.5V2.5H10.5ZM10 1C9.44772 1 9 1.44772 9 2V6C9 6.55228 9.44772 7 10 7H14C14.5523 7 15 6.55228 15 6V2C15 1.44772 14.5523 1 14 1H10ZM10.5 13.5V10.5H13.5V13.5H10.5ZM9 10C9 9.44772 9.44772 9 10 9H14C14.5523 9 15 9.44772 15 10V14C15 14.5523 14.5523 15 14 15H10C9.44772 15 9 14.5523 9 14V10Z" fill="currentColor" />
-              </svg>
-            ) : (
-              <svg data-testid="geist-icon" height="16" width="16" viewBox="0 0 16 16" style={{ color: 'currentColor' }} strokeLinejoin="round" fill="none">
-                <path d="M3 10.25C4.51878 10.25 5.75 11.4812 5.75 13C5.75 14.5188 4.51878 15.75 3 15.75C1.48122 15.75 0.25 14.5188 0.25 13C0.25 11.4812 1.48122 10.25 3 10.25ZM13 10.25C14.5188 10.25 15.75 11.4812 15.75 13C15.75 14.5188 14.5188 15.75 13 15.75C11.4812 15.75 10.25 14.5188 10.25 13C10.25 11.4812 11.4812 10.25 13 10.25ZM3 11.75C2.30964 11.75 1.75 12.3096 1.75 13C1.75 13.6904 2.30964 14.25 3 14.25C3.69036 14.25 4.25 13.6904 4.25 13C4.25 12.3096 3.69036 11.75 3 11.75ZM13 11.75C12.3096 11.75 11.75 12.3096 11.75 13C11.75 13.6904 12.3096 14.25 13 14.25C13.6904 14.25 14.25 13.6904 14.25 13C14.25 12.3096 13.3096 11.75 13 11.75ZM8 12C8.55228 12 9 12.4477 9 13C9 13.5523 8.55228 14 8 14C7.44772 14 7 13.5523 7 13C7 12.4477 7.44772 12 8 12ZM2.5 7C3.05228 7 3.5 7.44772 3.5 8C3.5 8.55228 3.05228 9 2.5 9C1.94772 9 1.5 8.55228 1.5 8C1.5 7.44772 1.94772 7 2.5 7ZM8 7C8.55228 7 9 7.44772 9 8C9 8.55228 8.55228 9 8 9C7.44772 9 7 8.55228 7 8C7 7.44772 7.44772 7 8 7ZM13.5 7C14.0523 7 14.5 7.44772 14.5 8C14.5 8.55228 14.0523 9 13.5 9C12.9477 9 12.5 8.55228 12.5 8C12.5 7.44772 12.9477 7 13.5 7ZM8 0.25C9.51878 0.25 10.75 1.48122 10.75 3C10.75 4.51878 9.51878 5.75 8 5.75C6.48122 5.75 5.25 4.51878 5.25 3C5.25 1.48122 6.48122 0.25 8 0.25ZM8 1.75C7.30964 1.75 6.75 2.30964 6.75 3C6.75 3.69036 7.30964 4.25 8 4.25C8.69036 4.25 9.25 3.69036 9.25 3C9.25 2.30964 8.69036 1.75 8 1.75ZM2.5 2C3.05228 2 3.5 2.44772 3.5 3C3.5 3.55228 3.05228 4 2.5 4C1.94772 4 1.5 3.55228 1.5 3C1.5 2.44772 1.94772 2 2.5 2ZM13.5 2C14.0523 2 14.5 2.44772 14.5 3C14.5 3.55228 14.0523 4 13.5 4C12.9477 4 12.5 3.55228 12.5 3C12.5 2.44772 12.9477 2 13.5 2Z" fill="currentColor" />
-              </svg>
-            )}
-          </span>
+          {view === 'neural' ? (
+            <svg data-testid="geist-icon" height="16" width="16" viewBox="0 0 16 16" style={{ color: 'currentColor' }} strokeLinejoin="round">
+              <path fillRule="evenodd" clipRule="evenodd" d="M2.5 5.5V2.5H5.5V5.5H2.5ZM1 2C1 1.44772 1.44772 1 2 1H6C6.55228 1 7 1.44772 7 2V6C7 6.55228 6.55228 7 6 7H2C1.44772 7 1 6.55228 1 6V2ZM2.5 13.5V10.5H5.5V13.5H2.5ZM1 10C1 9.44772 1.44772 9 2 9H6C6.55228 9 7 9.44772 7 10V14C7 14.5523 6.55228 15 6 15H2C1.44772 15 1 14.5523 1 14V10ZM10.5 2.5V5.5H13.5V2.5H10.5ZM10 1C9.44772 1 9 1.44772 9 2V6C9 6.55228 9.44772 7 10 7H14C14.5523 7 15 6.55228 15 6V2C15 1.44772 14.5523 1 14 1H10ZM10.5 13.5V10.5H13.5V13.5H10.5ZM9 10C9 9.44772 9.44772 9 10 9H14C14.5523 9 15 9.44772 15 10V14C15 14.5523 14.5523 15 14 15H10C9.44772 15 9 14.5523 9 14V10Z" fill="currentColor" />
+            </svg>
+          ) : viewToggleUsed ? (
+            <svg data-testid="geist-icon" height="16" width="16" viewBox="0 0 16 16" style={{ color: 'currentColor' }} strokeLinejoin="round" fill="none">
+              <path d="M3 10.25C4.51878 10.25 5.75 11.4812 5.75 13C5.75 14.5188 4.51878 15.75 3 15.75C1.48122 15.75 0.25 14.5188 0.25 13C0.25 11.4812 1.48122 10.25 3 10.25ZM13 10.25C14.5188 10.25 15.75 11.4812 15.75 13C15.75 14.5188 14.5188 15.75 13 15.75C11.4812 15.75 10.25 14.5188 10.25 13C10.25 11.4812 11.4812 10.25 13 10.25ZM3 11.75C2.30964 11.75 1.75 12.3096 1.75 13C1.75 13.6904 2.30964 14.25 3 14.25C3.69036 14.25 4.25 13.6904 4.25 13C4.25 12.3096 3.69036 11.75 3 11.75ZM13 11.75C12.3096 11.75 11.75 12.3096 11.75 13C11.75 13.6904 12.3096 14.25 13 14.25C13.6904 14.25 14.25 13.6904 14.25 13C14.25 12.3096 13.3096 11.75 13 11.75ZM8 12C8.55228 12 9 12.4477 9 13C9 13.5523 8.55228 14 8 14C7.44772 14 7 13.5523 7 13C7 12.4477 7.44772 12 8 12ZM2.5 7C3.05228 7 3.5 7.44772 3.5 8C3.5 8.55228 3.05228 9 2.5 9C1.94772 9 1.5 8.55228 1.5 8C1.5 7.44772 1.94772 7 2.5 7ZM8 7C8.55228 7 9 7.44772 9 8C9 8.55228 8.55228 9 8 9C7.44772 9 7 8.55228 7 8C7 7.44772 7.44772 7 8 7ZM13.5 7C14.0523 7 14.5 7.44772 14.5 8C14.5 8.55228 14.0523 9 13.5 9C12.9477 9 12.5 8.55228 12.5 8C12.5 7.44772 12.9477 7 13.5 7ZM8 0.25C9.51878 0.25 10.75 1.48122 10.75 3C10.75 4.51878 9.51878 5.75 8 5.75C6.48122 5.75 5.25 4.51878 5.25 3C5.25 1.48122 6.48122 0.25 8 0.25ZM8 1.75C7.30964 1.75 6.75 2.30964 6.75 3C6.75 3.69036 7.30964 4.25 8 4.25C8.69036 4.25 9.25 3.69036 9.25 3C9.25 2.30964 8.69036 1.75 8 1.75ZM2.5 2C3.05228 2 3.5 2.44772 3.5 3C3.5 3.55228 3.05228 4 2.5 4C1.94772 4 1.5 3.55228 1.5 3C1.5 2.44772 1.94772 2 2.5 2ZM13.5 2C14.0523 2 14.5 2.44772 14.5 3C14.5 3.55228 14.0523 4 13.5 4C12.9477 4 12.5 3.55228 12.5 3C12.5 2.44772 12.9477 2 13.5 2Z" fill="currentColor" />
+            </svg>
+          ) : (
+            <SignalIcon size={16} />
+          )}
         </button>
         )}
       </div>
@@ -290,11 +308,13 @@ export default function TopBar() {
         <span className="shrink-0 font-mono" suppressHydrationWarning>
           {mounted ? `SFO ${formatTime(now, 'America/Los_Angeles', true)}` : 'SFO --:--:--'}
         </span>
-        <Link href="https://github.com/ramintahbaz23/" target="_blank" rel="noopener noreferrer" className="shrink-0 hover:underline underline-offset-2">
-          GitHub
+        <Link href="https://github.com/ramintahbaz23/" target="_blank" rel="noopener noreferrer" className="shrink-0 flex items-center hover:opacity-80" aria-label="GitHub">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/GitHub_Invertocat_White.svg" alt="" className="h-3.5 w-3.5" />
         </Link>
-        <Link href="https://www.linkedin.com/in/ramin-tahbaz/" target="_blank" rel="noopener noreferrer" className="shrink-0 hover:underline underline-offset-2">
-          Connect
+        <Link href="https://www.linkedin.com/in/ramin-tahbaz/" target="_blank" rel="noopener noreferrer" className="shrink-0 flex items-center hover:opacity-80" aria-label="LinkedIn">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/linkedin-icon.png" alt="" className="h-3.5 w-3.5" />
         </Link>
         <span className="shrink-0 text-white/60 cursor-default hidden">Resume</span>
         <Link

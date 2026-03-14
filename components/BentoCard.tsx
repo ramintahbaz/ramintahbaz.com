@@ -15,21 +15,23 @@ interface BentoCardProps {
   item: WorkItem;
   index: number;
   active: boolean;
+  visited?: boolean;
   year?: string;
   minHeight?: number;
   isMobile?: boolean;
+  skipEntryAnimation?: boolean;
+  startEntryAnimation?: boolean;
   onSelect: () => void;
   onHoverChange?: (item: WorkItem | null, e?: React.MouseEvent<HTMLDivElement>, cardRect?: DOMRect) => void;
 }
 
 const ENTRY_DURATION_MS = 500;
 const ENTRY_DELAY_PER_INDEX_MS = 60;
-const GRID_VISITED_KEY = 'gridVisited';
+const VISITED_PURPLE = 'rgb(153, 51, 255)'; // matches neural view visited node color
 
-export function BentoCard({ item, index, active, year, minHeight = 130, isMobile = false, onSelect, onHoverChange }: BentoCardProps) {
+export function BentoCard({ item, index, active, visited = false, year, minHeight = 130, isMobile = false, skipEntryAnimation = false, startEntryAnimation = true, onSelect, onHoverChange }: BentoCardProps) {
   const [hovered, setHovered] = useState(false);
   const [animationDone, setAnimationDone] = useState(false);
-  const [skipEntryAnimation, setSkipEntryAnimation] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const rawYear = year ?? item.year;
   const displayYear = rawYear ? (rawYear.match(/\d{4}/)?.[0] ?? '--') : '--';
@@ -39,23 +41,11 @@ export function BentoCard({ item, index, active, year, minHeight = 130, isMobile
   }, []);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (sessionStorage.getItem(GRID_VISITED_KEY) === 'true') {
-      setSkipEntryAnimation(true);
-      return;
-    }
+    if (skipEntryAnimation || !startEntryAnimation) return;
     const delay = ENTRY_DURATION_MS + index * ENTRY_DELAY_PER_INDEX_MS;
-    const t = setTimeout(() => {
-      setAnimationDone(true);
-      sessionStorage.setItem(GRID_VISITED_KEY, 'true');
-    }, delay);
+    const t = setTimeout(() => setAnimationDone(true), delay);
     return () => clearTimeout(t);
-  }, [index]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (sessionStorage.getItem(GRID_VISITED_KEY) === 'true') setSkipEntryAnimation(true);
-  }, []);
+  }, [index, skipEntryAnimation, startEntryAnimation]);
 
   useEffect(() => {
     (document.activeElement as HTMLElement)?.blur();
@@ -67,6 +57,10 @@ export function BentoCard({ item, index, active, year, minHeight = 130, isMobile
 
   const entryDelayMs = index * ENTRY_DELAY_PER_INDEX_MS;
   const effectiveDone = skipEntryAnimation || animationDone;
+  const runEntryAnimation = !skipEntryAnimation && startEntryAnimation;
+  const waitingToStart = !skipEntryAnimation && !startEntryAnimation;
+
+  const showVisitedState = visited && effectiveDone;
 
   return (
     <div
@@ -89,15 +83,15 @@ export function BentoCard({ item, index, active, year, minHeight = 130, isMobile
         gridRow: 'span 1',
         minHeight,
         isolation: 'isolate',
-        opacity: effectiveDone ? (active ? 1 : 0.29) : undefined,
+        opacity: effectiveDone ? (active ? (showVisitedState ? 0.6 : 1) : 0.29) : (waitingToStart || runEntryAnimation) ? 0 : undefined,
         outline: 'none',
         WebkitTapHighlightColor: 'transparent',
-        pointerEvents: 'auto',
+        pointerEvents: effectiveDone ? 'auto' : 'none',
         borderRadius: 8,
         overflow: 'hidden',
-        animation: skipEntryAnimation ? 'none' : `bentoCardEntry ${ENTRY_DURATION_MS}ms ease-out ${entryDelayMs}ms both`,
-        transform: effectiveDone ? (hovered && !isMobile ? 'translateY(0) scale(0.982)' : 'translateY(0) scale(1)') : undefined,
-        transition: 'opacity 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease',
+        animation: runEntryAnimation ? `bentoCardEntry ${ENTRY_DURATION_MS}ms ease-out ${entryDelayMs}ms both` : 'none',
+        transform: effectiveDone ? (hovered && !isMobile ? 'translateY(0) scale(0.982)' : 'translateY(0) scale(1)') : waitingToStart ? 'translateY(20px)' : undefined,
+        transition: 'opacity 2.2s ease-in-out, transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease',
       }}
     >
       {/* Glass layer — separate so year can cut through with mix-blend-mode */}
@@ -204,13 +198,29 @@ export function BentoCard({ item, index, active, year, minHeight = 130, isMobile
             {item.category}
           </div>
 
-          {/* Row 2: title — left-aligned, 14px inset to match year */}
+          {/* Row 2: title — left-aligned; purple dot when visited (matches neural view) */}
           <div style={{
             gridColumn: '1 / -1',
             gridRow: '2',
             display: 'flex',
             alignItems: 'center',
+            gap: 8,
           }}>
+            {visited && (
+              <div
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: '50%',
+                  flexShrink: 0,
+                  background: VISITED_PURPLE,
+                  boxShadow: `0 0 8px ${VISITED_PURPLE}`,
+                  opacity: showVisitedState ? 1 : 0,
+                  transition: 'opacity 2.2s ease-in-out',
+                }}
+                aria-hidden
+              />
+            )}
             <div style={{
               fontSize: isMobile ? 12 : 14,
               fontWeight: 500,

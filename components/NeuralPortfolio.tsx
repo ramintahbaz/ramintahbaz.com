@@ -5,8 +5,10 @@ import { useEffect, useLayoutEffect, useRef, useState, useCallback, Suspense } f
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCategoryFilter } from '@/contexts/CategoryFilterContext';
+import { useSplash } from '@/contexts/SplashContext';
 import type { ProjectModalProject } from '@/components/ProjectModal';
 import { BentoCard } from '@/components/BentoCard';
+import SignalIcon from '@/components/SignalIcon';
 
 const ProjectModal = dynamic(
   () => import('@/components/ProjectModal').then((m) => ({ default: m.ProjectModal })),
@@ -1003,6 +1005,12 @@ const CATEGORY_GL_COLORS: Record<WorkItem['category'], [number, number, number]>
   writing:     [0.77, 0.54, 0.43],   // distinct peach
 };
 
+// Visited node: high-contrast purple (classic link style), lit, no flash (session-only)
+const VISITED_GL_COLOR: [number, number, number] = [0.6, 0.2, 1];
+
+// All unvisited work nodes use one uniform color (warm blush)
+const UNVISITED_WORK_NODE_COLOR: [number, number, number] = [0.79, 0.57, 0.48];
+
 // Shader filter: 0 = all, 1 = product, 2 = film, 3 = interaction, 4 = writing
 const CATEGORY_FILTER_INDEX: Record<'all' | WorkItem['category'], number> = {
   all: 0, product: 1, film: 2, interaction: 3, writing: 4,
@@ -1045,25 +1053,25 @@ float snoise(vec3 v){
 
 const NODE_VERT = `${noiseFn}
 attribute float nodeSize;attribute float nodeType;attribute vec3 nodeColor;
-attribute float distanceFromRoot;attribute float isWorkNode;attribute float workPhaseOffset;attribute float categoryIndex;attribute float workItemIndex;
+attribute float distanceFromRoot;attribute float isWorkNode;attribute float workPhaseOffset;attribute float categoryIndex;attribute float workItemIndex;attribute float visited;
 uniform float uTime;uniform vec3 uPulsePositions[3];uniform float uPulseTimes[3];
 uniform float uPulseSpeed;uniform float uBaseNodeSize;uniform float uFilterCategory;uniform float uWorkNodeSizeMult;uniform float uSelectedWorkItemIndex;
 varying vec3 vColor;varying float vIsWorkNode;varying float vPulseIntensity;
-varying float vDistanceFromRoot;varying float vGlow;varying float vWorkPhaseOffset;varying float vCategoryIndex;varying float vSelected;
+varying float vDistanceFromRoot;varying float vGlow;varying float vWorkPhaseOffset;varying float vCategoryIndex;varying float vSelected;varying float vVisited;
 float getPulse(vec3 wp,vec3 pp,float pt){
   if(pt<0.)return 0.;float ts=uTime-pt;if(ts<0.||ts>4.)return 0.;
   float pr=ts*uPulseSpeed;float d=distance(wp,pp);
   return smoothstep(3.,0.,abs(d-pr))*smoothstep(4.,0.,ts);}
 void main(){
-  vColor=nodeColor;vIsWorkNode=isWorkNode;vDistanceFromRoot=distanceFromRoot;vWorkPhaseOffset=workPhaseOffset;vCategoryIndex=categoryIndex;
+  vVisited=visited;vColor=nodeColor;vIsWorkNode=isWorkNode;vDistanceFromRoot=distanceFromRoot;vWorkPhaseOffset=workPhaseOffset;vCategoryIndex=categoryIndex;
   float sel=(isWorkNode>0.5&&workItemIndex>=0.0&&workItemIndex==uSelectedWorkItemIndex)?1.0:0.0;vSelected=sel;
   vec3 worldPos=(modelMatrix*vec4(position,1.)).xyz;
   float tp=0.;for(int i=0;i<3;i++)tp+=getPulse(worldPos,uPulsePositions[i],uPulseTimes[i]);
-  vPulseIntensity=min(tp,1.);
+  vPulseIntensity=visited>0.5?0.0:min(tp,1.);
   float bf=1.8;float ba=0.25;
-  float breathe=isWorkNode>0.5?(sin(uTime*bf+workPhaseOffset)*ba+0.85):0.95;
+  float breathe=visited>0.5?0.95:(isWorkNode>0.5?(sin(uTime*bf+workPhaseOffset)*ba+0.85):0.95);
   float base=nodeSize*breathe;float pulse=base*(1.+vPulseIntensity*2.5);
-  vGlow=isWorkNode>0.5?(0.5+0.5*sin(uTime*0.5+distanceFromRoot*0.2)):0.0;
+  vGlow=visited>0.5?0.0:(isWorkNode>0.5?(0.5+0.5*sin(uTime*0.5+distanceFromRoot*0.2)):0.0);
   vec3 modPos=position;
   if(nodeType>0.5){float n=snoise(position*0.08+uTime*0.08);modPos+=normal*n*0.15;}
   vec4 mv=modelViewMatrix*vec4(modPos,1.);
@@ -1071,20 +1079,23 @@ void main(){
   gl_PointSize=sz*(1.0+sel*0.3);gl_Position=projectionMatrix*mv;}`;
 
 const NODE_FRAG = `
-uniform float uTime;uniform vec3 uPulseColors[3];uniform float uFilterCategory;uniform float uWorkNodeBrightness;uniform float uNonWorkOpacity;
+uniform float uTime;uniform vec3 uPulseColors[3];uniform float uFilterCategory;uniform float uWorkNodeBrightness;uniform float uNonWorkOpacity;uniform vec3 uVisitedColor;
 varying vec3 vColor;varying float vIsWorkNode;varying float vPulseIntensity;
-varying float vDistanceFromRoot;varying float vGlow;varying float vWorkPhaseOffset;varying float vCategoryIndex;varying float vSelected;
+varying float vDistanceFromRoot;varying float vGlow;varying float vWorkPhaseOffset;varying float vCategoryIndex;varying float vSelected;varying float vVisited;
 void main(){
   vec2 c=2.*gl_PointCoord-1.;float d=length(c);if(d>1.)discard;
   float g1=1.-smoothstep(0.,.5,d);float g2=1.-smoothstep(0.,1.,d);float gs=pow(g1,1.2)+g2*0.3;
+  vec3 col;float alpha=gs*(0.95-0.3*d);
+  if(vVisited>0.5){col=uVisitedColor*1.8;col+=vec3(1.)*smoothstep(0.4,0.,d)*0.3;}
+  else{
   float bc=vIsWorkNode>0.5?(0.9+0.1*sin(uTime*0.6+vDistanceFromRoot*0.25)):0.95;
-  vec3 col=vColor*bc;
+  col=vColor*bc;
   if(vIsWorkNode>0.5){col=vColor*1.4;}
   if(vPulseIntensity>0.){vec3 pc=mix(vec3(1.),uPulseColors[0],0.4);col=mix(col,pc,vPulseIntensity*0.8);col*=(1.+vPulseIntensity*1.2);gs*=(1.+vPulseIntensity);}
   col+=vec3(1.)*smoothstep(0.4,0.,d)*0.3;col*=(1.+vGlow*0.1);
-  float alpha=gs*(0.95-0.3*d);
   if(uFilterCategory>0.0&&abs(vCategoryIndex-uFilterCategory)>0.5)alpha*=0.12;
   if(vSelected>0.5){col*=(1.0+0.08*sin(uTime*2.0));alpha*=1.1;}
+  }
   if(vIsWorkNode<0.5){gl_FragColor=vec4(col*0.3,alpha*uNonWorkOpacity);return;}
   gl_FragColor=vec4(col*uWorkNodeBrightness,alpha);}`;
 
@@ -1344,11 +1355,20 @@ export default function NeuralPortfolio() {
   }, [transitioningToHref, router]);
 
   // Category filter menu: draggable position (null = default left/bottom)
-  const [view, setView] = useState<'neural' | 'grid'>('neural');
-  const viewRef = useRef<'neural' | 'grid'>('neural');
+  const [view, setView] = useState<'neural' | 'grid'>('grid');
+  const viewRef = useRef<'neural' | 'grid'>('grid');
   const [neuralRevealed, setNeuralRevealed] = useState(false);
   const [gridRevealed, setGridRevealed] = useState(() => typeof window !== 'undefined' && sessionStorage.getItem('gridRevealedBefore') === 'true');
+  const [hasSeenGridBefore, setHasSeenGridBefore] = useState(false);
+  const [returnedFromProject, setReturnedFromProject] = useState(() => typeof window !== 'undefined' && sessionStorage.getItem('gridVisited') === 'true');
   const searchParams = useSearchParams();
+  useEffect(() => {
+    if (returnedFromProject && typeof window !== 'undefined') {
+      sessionStorage.removeItem('gridVisited');
+      setHasSeenGridBefore(true);
+      setReturnedFromProject(false);
+    }
+  }, [returnedFromProject]);
   useEffect(() => {
     const v = searchParams.get('view');
     if (v === 'neural' || v === 'grid') {
@@ -1356,6 +1376,25 @@ export default function NeuralPortfolio() {
       viewRef.current = v;
     }
   }, [searchParams]);
+  const VIEW_TOGGLE_USED_KEY = 'viewToggleUsed';
+  const [viewToggleUsed, setViewToggleUsed] = useState(false);
+  const viewToggledByTouchRef = useRef(false);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const nav = performance.getEntriesByType?.('navigation')?.[0] as { type?: string } | undefined;
+    const isReload = nav?.type === 'reload';
+    if (isReload) {
+      sessionStorage.removeItem(VIEW_TOGGLE_USED_KEY);
+    } else if (sessionStorage.getItem(VIEW_TOGGLE_USED_KEY) === 'true') {
+      setViewToggleUsed(true);
+    }
+  }, []);
+  useEffect(() => {
+    if (view === 'neural' && typeof window !== 'undefined') {
+      sessionStorage.setItem(VIEW_TOGGLE_USED_KEY, 'true');
+      setViewToggleUsed(true);
+    }
+  }, [view]);
   // Calm entrance: neural view fades in on load; returning visitors skip delay (avoids re-init glitch on mobile)
   useEffect(() => {
     if (view === 'neural') {
@@ -1427,6 +1466,54 @@ export default function NeuralPortfolio() {
   useEffect(() => {
     activeProjectRef.current = activeProject;
   }, [activeProject]);
+
+  // Session-only: which project nodes/cards have been viewed (reset on refresh; survives in-tab navigation for mobile back)
+  const CRAFT_VISITED_IDS_KEY = 'craftVisitedIds';
+  const [visitedProjectIds, setVisitedProjectIds] = useState<Set<string>>(() => {
+    if (typeof window === 'undefined') return new Set();
+    const nav = performance.getEntriesByType?.('navigation')?.[0] as { type?: string } | undefined;
+    if (nav?.type === 'reload') {
+      try { sessionStorage.removeItem(CRAFT_VISITED_IDS_KEY); } catch { /* ignore */ }
+      return new Set();
+    }
+    try {
+      const raw = sessionStorage.getItem(CRAFT_VISITED_IDS_KEY);
+      if (!raw) return new Set();
+      const arr = JSON.parse(raw) as string[];
+      return new Set(Array.isArray(arr) ? arr : []);
+    } catch {
+      return new Set();
+    }
+  });
+  const visitedProjectIdsRef = useRef<Set<string>>(new Set());
+  const visitedDelayTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    visitedProjectIdsRef.current = visitedProjectIds;
+  }, [visitedProjectIds]);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      sessionStorage.setItem(CRAFT_VISITED_IDS_KEY, JSON.stringify([...visitedProjectIds]));
+    } catch { /* ignore */ }
+  }, [visitedProjectIds]);
+  useEffect(() => {
+    return () => {
+      if (visitedDelayTimeoutRef.current) clearTimeout(visitedDelayTimeoutRef.current);
+    };
+  }, []);
+  const markProjectViewed = useCallback((projectId: string | undefined) => {
+    if (projectId) setVisitedProjectIds(prev => new Set(prev).add(projectId));
+  }, []);
+  const openProject = useCallback((project: ProjectModalProject) => {
+    setActiveProject(project);
+    if (project?.id) {
+      if (visitedDelayTimeoutRef.current) clearTimeout(visitedDelayTimeoutRef.current);
+      visitedDelayTimeoutRef.current = setTimeout(() => {
+        visitedDelayTimeoutRef.current = null;
+        setVisitedProjectIds(prev => new Set(prev).add(project.id));
+      }, 500);
+    }
+  }, []);
 
   // Push history when opening project modal so browser back closes modal instead of leaving the page
   useEffect(() => {
@@ -1514,16 +1601,25 @@ export default function NeuralPortfolio() {
   const cameraRef = useRef<any>(null);
   const triggerPulseRef = useRef<((x: number, y: number) => void) | null>(null);
   const nodeMaterialRef = useRef<any>(null);
+  const nodesMeshRef = useRef<any>(null);
   const connMaterialRef = useRef<any>(null);
   const bloomPassRef = useRef<any>(null);
   const controlsRef = useRef<any>(null);
   const rendererRef = useRef<any>(null);
 
   const { categoryFilter, setCategoryFilter } = useCategoryFilter();
+  const { splashDone } = useSplash();
   const categoryFilterRef = useRef(categoryFilter);
   useEffect(() => {
     categoryFilterRef.current = categoryFilter;
   }, [categoryFilter]);
+  // After splash is done and we're on grid, mark "seen grid" so switching neural→grid later doesn't re-animate cards
+  useEffect(() => {
+    if (splashDone && view === 'grid') {
+      const t = setTimeout(() => setHasSeenGridBefore(true), 2000);
+      return () => clearTimeout(t);
+    }
+  }, [splashDone, view]);
 
   const [devParams, setDevParams] = useState<DevParams>(DEV_PARAMS_DEFAULTS);
 
@@ -1693,7 +1789,7 @@ export default function NeuralPortfolio() {
 
       // ── Node geometry ──────────────────────────────────────
       const nPos: number[] = [], nType: number[] = [], nSize: number[] = [];
-      const nColor: number[] = [], nDist: number[] = [], nIsWork: number[] = [], nPhase: number[] = [], nCategoryIdx: number[] = [], nWorkItemIdx: number[] = [];
+      const nColor: number[] = [], nDist: number[] = [], nIsWork: number[] = [], nPhase: number[] = [], nCategoryIdx: number[] = [], nWorkItemIdx: number[] = [], nVisited: number[] = [];
 
       nodes.forEach(node => {
         nPos.push(node.position.x, node.position.y, node.position.z);
@@ -1701,9 +1797,10 @@ export default function NeuralPortfolio() {
         nSize.push(node.size);
         nDist.push(node.distanceFromRoot);
         nWorkItemIdx.push(node.workItemIndex >= 0 ? node.workItemIndex : -1);
+        nVisited.push(0); // updated when visitedProjectIds changes
         if (node.workItemIndex >= 0) {
           const cat = WORK_ITEMS[node.workItemIndex].category;
-          const [r, g, b] = CATEGORY_GL_COLORS[cat];
+          const [r, g, b] = UNVISITED_WORK_NODE_COLOR;
           nColor.push(r, g, b);
           nIsWork.push(1.0);
           nPhase.push(node.workItemIndex * 0.63);
@@ -1735,16 +1832,28 @@ export default function NeuralPortfolio() {
       nGeo.setAttribute('workPhaseOffset', new THREE.Float32BufferAttribute(nPhase, 1));
       nGeo.setAttribute('categoryIndex', new THREE.Float32BufferAttribute(nCategoryIdx, 1));
       nGeo.setAttribute('workItemIndex', new THREE.Float32BufferAttribute(nWorkItemIdx, 1));
+      nGeo.setAttribute('visited', new THREE.Float32BufferAttribute(nVisited, 1));
 
+      const visitedColorVec = new THREE.Vector3(VISITED_GL_COLOR[0], VISITED_GL_COLOR[1], VISITED_GL_COLOR[2]);
       const nMat = new THREE.ShaderMaterial({
-        uniforms: { ...pulseUniforms, uBaseNodeSize: { value: 0.6 }, uFilterCategory: { value: 0 }, uWorkNodeSizeMult: { value: 1.0 }, uWorkNodeBrightness: { value: 1.0 }, uNonWorkOpacity: { value: 0.15 }, uSelectedWorkItemIndex: { value: -1 } },
+        uniforms: { ...pulseUniforms, uBaseNodeSize: { value: 0.6 }, uFilterCategory: { value: 0 }, uWorkNodeSizeMult: { value: 1.0 }, uWorkNodeBrightness: { value: 1.0 }, uNonWorkOpacity: { value: 0.15 }, uSelectedWorkItemIndex: { value: -1 }, uVisitedColor: { value: visitedColorVec } },
         vertexShader: NODE_VERT, fragmentShader: NODE_FRAG,
         transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
       });
       const nodesMesh = new THREE.Points(nGeo, nMat);
       scene.add(nodesMesh);
       nodeMaterialRef.current = nMat;
+      nodesMeshRef.current = nodesMesh;
       nMat.uniforms.uFilterCategory.value = CATEGORY_FILTER_INDEX[categoryFilterRef.current];
+
+      // Sync visited attribute from ref (may have been updated before init completed)
+      const visitedAttr = nGeo.getAttribute('visited') as THREE.BufferAttribute;
+      const visitedArr = visitedAttr.array as Float32Array;
+      for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+        visitedArr[i] = node.workItemIndex >= 0 && visitedProjectIdsRef.current.has(WORK_ITEMS[node.workItemIndex].id) ? 1 : 0;
+      }
+      visitedAttr.needsUpdate = true;
 
       // ── Connection geometry ────────────────────────────────
       const cPos: number[] = [], cColor: number[] = [], cStr: number[] = [];
@@ -1900,6 +2009,22 @@ export default function NeuralPortfolio() {
     mat.uniforms.uSelectedWorkItemIndex.value = selectedNodeId != null ? WORK_ITEMS.findIndex(w => w.id === selectedNodeId) : -1;
   }, [selectedNodeId]);
 
+  // Sync visited node attribute when visitedProjectIds changes (desktop + mobile)
+  useEffect(() => {
+    const mesh = nodesMeshRef.current;
+    const nodes = networkNodesRef.current;
+    if (!mesh?.geometry || !nodes?.length) return;
+    const geo = mesh.geometry as THREE.BufferGeometry;
+    const attr = geo.getAttribute('visited') as THREE.BufferAttribute | undefined;
+    if (!attr) return;
+    const arr = attr.array as Float32Array;
+    for (let i = 0; i < nodes.length; i++) {
+      const node = nodes[i];
+      arr[i] = node.workItemIndex >= 0 && visitedProjectIds.has(WORK_ITEMS[node.workItemIndex].id) ? 1 : 0;
+    }
+    attr.needsUpdate = true;
+  }, [visitedProjectIds]);
+
   useEffect(() => {
     const nMat = nodeMaterialRef.current;
     const cMat = connMaterialRef.current;
@@ -2016,16 +2141,21 @@ export default function NeuralPortfolio() {
       setHovered(null);
       setCardVisible(false);
       if (isMobile) {
+        if (visitedDelayTimeoutRef.current) clearTimeout(visitedDelayTimeoutRef.current);
+        visitedDelayTimeoutRef.current = setTimeout(() => {
+          visitedDelayTimeoutRef.current = null;
+          setVisitedProjectIds(prev => new Set(prev).add(hit.id));
+        }, 500);
         setMobilePreview(hit);
         setMobilePreviewVisible(true);
         return;
       }
       setSelectedNodeId(hit.id);
-      setActiveProject(PROJECT_DETAILS[hit.id] ?? null);
+      openProject(PROJECT_DETAILS[hit.id] ?? null);
       return;
     }
     triggerPulseRef.current?.(e.clientX, e.clientY);
-  }, [view, isTouchDevice, isMobile, router]);
+  }, [view, isTouchDevice, isMobile, router, markProjectViewed, openProject]);
 
   const dismissMobilePreview = useCallback(() => {
     setMobilePreviewVisible(false);
@@ -2036,13 +2166,13 @@ export default function NeuralPortfolio() {
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: '#050508', fontFamily: "'Outfit', sans-serif" }}>
-      <style dangerouslySetInnerHTML={{ __html: '@keyframes gridFadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } } @keyframes bentoCardEntry { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }' }} />
+      <style dangerouslySetInnerHTML={{ __html: '@keyframes gridFadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } } @keyframes bentoCardEntry { from { transform: translateY(20px); } to { transform: translateY(0); } }' }} />
       {/* Neural network wrapper — dimmed in grid view, non-interactive; calm fade-in on load */}
       <div
         style={{
           position: 'absolute',
           inset: 0,
-          opacity: view === 'grid' ? 0.15 : (neuralRevealed ? 1 : 0),
+          opacity: view === 'grid' ? (splashDone ? 0.15 : 0) : (neuralRevealed ? 1 : 0),
           transition: 'opacity 1.2s cubic-bezier(0.25, 0.1, 0.25, 1)',
           pointerEvents: view === 'grid' ? 'none' : 'auto',
         }}
@@ -2098,15 +2228,28 @@ export default function NeuralPortfolio() {
                   item={item}
                   index={i}
                   active={categoryFilter === 'all' || item.category === categoryFilter}
+                  visited={visitedProjectIds.has(item.id)}
                   year={PROJECT_DETAILS[item.id]?.year}
                   minHeight={100}
                   isMobile={isMobile}
+                  skipEntryAnimation={hasSeenGridBefore || returnedFromProject}
+                  startEntryAnimation={splashDone}
                   onSelect={() => {
                     if (isMobile) {
-                      sessionStorage.setItem('splashDone', 'true');
-                      router.push(`/work/${item.id}`);
+                      setMobilePreview(item);
+                      setMobilePreviewVisible(true);
+                      const id = item.id;
+                      setTimeout(() => {
+                        setVisitedProjectIds(prev => new Set(prev).add(id));
+                        try {
+                          const raw = sessionStorage.getItem(CRAFT_VISITED_IDS_KEY);
+                          const set = new Set(raw ? (JSON.parse(raw) as string[]) : []);
+                          set.add(id);
+                          sessionStorage.setItem(CRAFT_VISITED_IDS_KEY, JSON.stringify([...set]));
+                        } catch { /* ignore */ }
+                      }, 500);
                     } else {
-                      setActiveProject(PROJECT_DETAILS[item.id] ?? null);
+                      openProject(PROJECT_DETAILS[item.id] ?? null);
                     }
                   }}
                   onHoverChange={(hoverItem, _e, cardRect) => {
@@ -2144,7 +2287,7 @@ export default function NeuralPortfolio() {
                 lineHeight: 1.7,
                 transition: 'opacity 0.4s ease',
               }}>
-                {categoryFilter === 'all' && `Welcome to the neural network of Ramin Tahbaz, a Washington, DC-based product designer exploring the space between design and code. Working across product, film, and writing, Ramin builds for himself and for teams shaping what's next, from fintech infrastructure and developer tools to AI-native products. Rooted in both craft and engineering, this space is a curated collection of work built with intention and curiosity.`}
+                {categoryFilter === 'all' && `Welcome to the neural network of Ramin Tahbaz, a Washington, DC-based design engineer exploring the space between design and code. Working across product, film, and writing, Ramin builds for himself and for teams shaping what's next, from fintech infrastructure and developer tools to AI-native products. Rooted in both craft and engineering, this space is a curated collection of work built with intention and curiosity.`}
                 {categoryFilter === 'interaction' && `Interactions are the punctuation in a product. Easy to miss when they're right, impossible to ignore when they're off. The best ones feel like the interface already knew what you were going to do. These are my experiments in that: motion as feedback, friction as signal, every small decision made on purpose.`}
                 {categoryFilter === 'product' && `Good product stays quiet. It gets out of the way so the person using it feels capable. Solid logic underneath, interfaces that scale without breaking, and experiences that don't waste anyone's time. From first sketch to shipped, full ownership of every decision.`}
                 {categoryFilter === 'film' && `Film is just another way to control what someone feels and when. Swap a component for a lens, a transition for a cut. The problem is the same. Earn attention, hold it, leave the audience somewhere they didn't expect.`}
@@ -2174,7 +2317,7 @@ export default function NeuralPortfolio() {
             lineHeight: 1.7,
             transition: 'opacity 0.4s ease',
           }}>
-            {categoryFilter === 'all' && `Welcome to the neural network of Ramin Tahbaz, a Washington, DC-based product designer exploring the space between design and code. Working across product, film, and writing, Ramin builds for himself and for teams shaping what's next, from fintech infrastructure and developer tools to AI-native products. Rooted in both craft and engineering, this space is a curated collection of work built with intention and curiosity.`}
+            {categoryFilter === 'all' && `Welcome to the neural network of Ramin Tahbaz, a Washington, DC-based design engineer exploring the space between design and code. Working across product, film, and writing, Ramin builds for himself and for teams shaping what's next, from fintech infrastructure and developer tools to AI-native products. Rooted in both craft and engineering, this space is a curated collection of work built with intention and curiosity.`}
             {categoryFilter === 'interaction' && `Interactions are the punctuation in a product. Easy to miss when they're right, impossible to ignore when they're off. The best ones feel like the interface already knew what you were going to do. These are my experiments in that: motion as feedback, friction as signal, every small decision made on purpose.`}
             {categoryFilter === 'product' && `Good product stays quiet. It gets out of the way so the person using it feels capable. Solid logic underneath, interfaces that scale without breaking, and experiences that don't waste anyone's time. From first sketch to shipped, full ownership of every decision.`}
             {categoryFilter === 'film' && `Film is just another way to control what someone feels and when. Swap a component for a lens, a transition for a cut. The problem is the same. Earn attention, hold it, leave the audience somewhere they didn't expect.`}
@@ -2309,7 +2452,21 @@ export default function NeuralPortfolio() {
 
           {/* View swap (bento grid ↔ neural) — desktop only; hidden on mobile (view swap is in TopBar on mobile) */}
           <button
+            onTouchStartCapture={(e) => {
+              const next = view === 'neural' ? 'grid' : 'neural';
+              setView(next);
+              const params = new URLSearchParams(window.location.search);
+              params.set('view', next);
+              window.history.replaceState(null, '', `?${params.toString()}`);
+              viewToggledByTouchRef.current = true;
+              e.preventDefault();
+              e.stopPropagation();
+            }}
             onClick={() => {
+              if (viewToggledByTouchRef.current) {
+                viewToggledByTouchRef.current = false;
+                return;
+              }
               const next = view === 'neural' ? 'grid' : 'neural';
               setView(next);
               const params = new URLSearchParams(window.location.search);
@@ -2335,10 +2492,12 @@ export default function NeuralPortfolio() {
               <svg data-testid="geist-icon" height="16" width="16" viewBox="0 0 16 16" style={{ color: 'currentColor' }} strokeLinejoin="round">
                 <path fillRule="evenodd" clipRule="evenodd" d="M2.5 5.5V2.5H5.5V5.5H2.5ZM1 2C1 1.44772 1.44772 1 2 1H6C6.55228 1 7 1.44772 7 2V6C7 6.55228 6.55228 7 6 7H2C1.44772 7 1 6.55228 1 6V2ZM2.5 13.5V10.5H5.5V13.5H2.5ZM1 10C1 9.44772 1.44772 9 2 9H6C6.55228 9 7 9.44772 7 10V14C7 14.5523 6.55228 15 6 15H2C1.44772 15 1 14.5523 1 14V10ZM10.5 2.5V5.5H13.5V2.5H10.5ZM10 1C9.44772 1 9 1.44772 9 2V6C9 6.55228 9.44772 7 10 7H14C14.5523 7 15 6.55228 15 6V2C15 1.44772 14.5523 1 14 1H10ZM10.5 13.5V10.5H13.5V13.5H10.5ZM9 10C9 9.44772 9.44772 9 10 9H14C14.5523 9 15 9.44772 15 10V14C15 14.5523 14.5523 15 14 15H10C9.44772 15 9 14.5523 9 14V10Z" fill="currentColor" />
               </svg>
-            ) : (
+            ) : viewToggleUsed ? (
               <svg data-testid="geist-icon" height="16" width="16" viewBox="0 0 16 16" style={{ color: 'currentColor' }} strokeLinejoin="round" fill="none">
                 <path d="M3 10.25C4.51878 10.25 5.75 11.4812 5.75 13C5.75 14.5188 4.51878 15.75 3 15.75C1.48122 15.75 0.25 14.5188 0.25 13C0.25 11.4812 1.48122 10.25 3 10.25ZM13 10.25C14.5188 10.25 15.75 11.4812 15.75 13C15.75 14.5188 14.5188 15.75 13 15.75C11.4812 15.75 10.25 14.5188 10.25 13C10.25 11.4812 11.4812 10.25 13 10.25ZM3 11.75C2.30964 11.75 1.75 12.3096 1.75 13C1.75 13.6904 2.30964 14.25 3 14.25C3.69036 14.25 4.25 13.6904 4.25 13C4.25 12.3096 3.69036 11.75 3 11.75ZM13 11.75C12.3096 11.75 11.75 12.3096 11.75 13C11.75 13.6904 12.3096 14.25 13 14.25C13.6904 14.25 14.25 13.6904 14.25 13C14.25 12.3096 13.3096 11.75 13 11.75ZM8 12C8.55228 12 9 12.4477 9 13C9 13.5523 8.55228 14 8 14C7.44772 14 7 13.5523 7 13C7 12.4477 7.44772 12 8 12ZM2.5 7C3.05228 7 3.5 7.44772 3.5 8C3.5 8.55228 3.05228 9 2.5 9C1.94772 9 1.5 8.55228 1.5 8C1.5 7.44772 1.94772 7 2.5 7ZM8 7C8.55228 7 9 7.44772 9 8C9 8.55228 8.55228 9 8 9C7.44772 9 7 8.55228 7 8C7 7.44772 7.44772 7 8 7ZM13.5 7C14.0523 7 14.5 7.44772 14.5 8C14.5 8.55228 14.0523 9 13.5 9C12.9477 9 12.5 8.55228 12.5 8C12.5 7.44772 12.9477 7 13.5 7ZM8 0.25C9.51878 0.25 10.75 1.48122 10.75 3C10.75 4.51878 9.51878 5.75 8 5.75C6.48122 5.75 5.25 4.51878 5.25 3C5.25 1.48122 6.48122 0.25 8 0.25ZM8 1.75C7.30964 1.75 6.75 2.30964 6.75 3C6.75 3.69036 7.30964 4.25 8 4.25C8.69036 4.25 9.25 3.69036 9.25 3C9.25 2.30964 8.69036 1.75 8 1.75ZM2.5 2C3.05228 2 3.5 2.44772 3.5 3C3.5 3.55228 3.05228 4 2.5 4C1.94772 4 1.5 3.55228 1.5 3C1.5 2.44772 1.94772 2 2.5 2ZM13.5 2C14.0523 2 14.5 2.44772 14.5 3C14.5 3.55228 14.0523 4 13.5 4C12.9477 4 12.5 3.55228 12.5 3C12.5 2.44772 12.9477 2 13.5 2Z" fill="currentColor" />
               </svg>
+            ) : (
+              <SignalIcon size={16} />
             )}
           </button>
           </>
@@ -2390,7 +2549,7 @@ export default function NeuralPortfolio() {
           x={hovered.screenX}
           y={hovered.screenY}
           visible={cardVisible}
-          onNavigate={() => setActiveProject(PROJECT_DETAILS[hovered.item.id] ?? null)}
+          onNavigate={() => openProject(PROJECT_DETAILS[hovered.item.id] ?? null)}
         />
       )}
       {/* Hover card in grid view — same WorkCard style */}
@@ -2400,7 +2559,7 @@ export default function NeuralPortfolio() {
           x={gridHovered.screenX}
           y={gridHovered.screenY}
           visible={gridCardVisible}
-          onNavigate={() => setActiveProject(PROJECT_DETAILS[gridHovered!.item.id] ?? null)}
+          onNavigate={() => openProject(PROJECT_DETAILS[gridHovered!.item.id] ?? null)}
         />
       )}
       {isTouchDevice && mobilePreview && (
@@ -2410,6 +2569,7 @@ export default function NeuralPortfolio() {
           onNavigate={() => {
             dismissMobilePreview();
             sessionStorage.setItem('splashDone', 'true');
+            if (view === 'grid') sessionStorage.setItem('gridVisited', 'true');
             router.push(`/work/${mobilePreview.id}`);
           }}
           onDismiss={dismissMobilePreview}
