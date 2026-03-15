@@ -28,10 +28,12 @@ interface BentoCardProps {
 const ENTRY_DURATION_MS = 500;
 const ENTRY_DELAY_PER_INDEX_MS = 60;
 const VISITED_PURPLE = 'rgb(153, 51, 255)'; // matches neural view visited node color
+const FILTER_OPACITY_DURATION_MS = 200; // fast opacity when changing category filter only
 
 export function BentoCard({ item, index, active, visited = false, year, minHeight = 130, isMobile = false, skipEntryAnimation = false, startEntryAnimation = true, onSelect, onHoverChange }: BentoCardProps) {
   const [hovered, setHovered] = useState(false);
   const [animationDone, setAnimationDone] = useState(false);
+  const [useFastFilterTransition, setUseFastFilterTransition] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const rawYear = year ?? item.year;
   const displayYear = rawYear ? (rawYear.match(/\d{4}/)?.[0] ?? '--') : '--';
@@ -47,6 +49,17 @@ export function BentoCard({ item, index, active, visited = false, year, minHeigh
     return () => clearTimeout(t);
   }, [index, skipEntryAnimation, startEntryAnimation]);
 
+  // Fast opacity only for filter changes; keep 2.2s for entry. When skipEntryAnimation, use fast immediately.
+  useEffect(() => {
+    if (skipEntryAnimation) {
+      setUseFastFilterTransition(true);
+      return;
+    }
+    if (!(skipEntryAnimation || animationDone)) return;
+    const t = setTimeout(() => setUseFastFilterTransition(true), 2200);
+    return () => clearTimeout(t);
+  }, [skipEntryAnimation, animationDone]);
+
   useEffect(() => {
     (document.activeElement as HTMLElement)?.blur();
   }, []);
@@ -61,6 +74,7 @@ export function BentoCard({ item, index, active, visited = false, year, minHeigh
   const waitingToStart = !skipEntryAnimation && !startEntryAnimation;
 
   const showVisitedState = visited && effectiveDone;
+  const opacityDuration = useFastFilterTransition ? `${FILTER_OPACITY_DURATION_MS}ms` : '2.2s';
 
   return (
     <div
@@ -91,7 +105,7 @@ export function BentoCard({ item, index, active, visited = false, year, minHeigh
         overflow: 'hidden',
         animation: runEntryAnimation ? `bentoCardEntry ${ENTRY_DURATION_MS}ms ease-out ${entryDelayMs}ms both` : 'none',
         transform: effectiveDone ? (hovered && !isMobile ? 'translateY(0) scale(0.982)' : 'translateY(0) scale(1)') : waitingToStart ? 'translateY(20px)' : undefined,
-        transition: 'opacity 2.2s ease-in-out, transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease',
+        transition: `opacity ${opacityDuration} ease-out, transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease`,
       }}
     >
       {/* Glass layer — separate so year can cut through with mix-blend-mode */}
