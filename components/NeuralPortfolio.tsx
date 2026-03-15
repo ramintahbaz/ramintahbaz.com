@@ -2172,7 +2172,7 @@ export default function NeuralPortfolio() {
         style={{
           position: 'absolute',
           inset: 0,
-          opacity: view === 'grid' ? (splashDone ? 0.15 : 0) : (neuralRevealed ? 1 : 0),
+          opacity: view === 'grid' ? (splashDone ? 0.22 : 0) : (neuralRevealed ? 1 : 0),
           transition: 'opacity 1.2s cubic-bezier(0.25, 0.1, 0.25, 1)',
           pointerEvents: view === 'grid' ? 'none' : 'auto',
         }}
@@ -2287,9 +2287,9 @@ export default function NeuralPortfolio() {
                 lineHeight: 1.7,
                 transition: 'opacity 0.4s ease',
               }}>
-                {categoryFilter === 'all' && `Welcome to the neural network of Ramin Tahbaz, a Washington, DC-based design engineer exploring the space between design and code. Working across product, film, and writing, Ramin builds for himself and for teams shaping what's next, from fintech infrastructure and developer tools to AI-native products. Rooted in both craft and engineering, this space is a curated collection of work built with intention and curiosity.`}
-                {categoryFilter === 'interaction' && `Interactions are the punctuation in a product. Easy to miss when they're right, impossible to ignore when they're off. The best ones feel like the interface already knew what you were going to do. These are my experiments in that: motion as feedback, friction as signal, every small decision made on purpose.`}
-                {categoryFilter === 'product' && `Good product stays quiet. It gets out of the way so the person using it feels capable. Solid logic underneath, interfaces that scale without breaking, and experiences that don't waste anyone's time. From first sketch to shipped, full ownership of every decision.`}
+                {categoryFilter === 'all' && `Building fintech interfaces and experimenting with the details that make software feel invisible. Design engineer at Promise.`}
+                {categoryFilter === 'interaction' && `Interactions are the punctuation in a product. Easy to miss when they're right, impossible to ignore when they're off. The best ones feel like the interface already knew what you were going to do.`}
+                {categoryFilter === 'product' && `Good product stays quiet. It gets out of the way so the person using it feels capable. From idea to shipped, full ownership of every decision.`}
                 {categoryFilter === 'film' && `Film is just another way to control what someone feels and when. Swap a component for a lens, a transition for a cut. The problem is the same. Earn attention, hold it, leave the audience somewhere they didn't expect.`}
                 {categoryFilter === 'writing' && `These pieces move across technology, craft, and sometimes love. None of them are conclusions — just thoughts that needed somewhere to go. A way to think out loud, share what's on my mind, and see where it lands.`}
               </p>
@@ -2317,9 +2317,9 @@ export default function NeuralPortfolio() {
             lineHeight: 1.7,
             transition: 'opacity 0.4s ease',
           }}>
-            {categoryFilter === 'all' && `Welcome to the neural network of Ramin Tahbaz, a Washington, DC-based design engineer exploring the space between design and code. Working across product, film, and writing, Ramin builds for himself and for teams shaping what's next, from fintech infrastructure and developer tools to AI-native products. Rooted in both craft and engineering, this space is a curated collection of work built with intention and curiosity.`}
-            {categoryFilter === 'interaction' && `Interactions are the punctuation in a product. Easy to miss when they're right, impossible to ignore when they're off. The best ones feel like the interface already knew what you were going to do. These are my experiments in that: motion as feedback, friction as signal, every small decision made on purpose.`}
-            {categoryFilter === 'product' && `Good product stays quiet. It gets out of the way so the person using it feels capable. Solid logic underneath, interfaces that scale without breaking, and experiences that don't waste anyone's time. From first sketch to shipped, full ownership of every decision.`}
+            {categoryFilter === 'all' && `Building fintech interfaces and experimenting with the details that make software feel invisible. Design engineer at Promise.`}
+            {categoryFilter === 'interaction' && `Interactions are the punctuation in a product. Easy to miss when they're right, impossible to ignore when they're off. The best ones feel like the interface already knew what you were going to do.`}
+            {categoryFilter === 'product' && `Good product stays quiet. It gets out of the way so the person using it feels capable. From idea to shipped, full ownership of every decision.`}
             {categoryFilter === 'film' && `Film is just another way to control what someone feels and when. Swap a component for a lens, a transition for a cut. The problem is the same. Earn attention, hold it, leave the audience somewhere they didn't expect.`}
             {categoryFilter === 'writing' && `These pieces move across technology, craft, and sometimes love. None of them are conclusions — just thoughts that needed somewhere to go. A way to think out loud, share what's on my mind, and see where it lands.`}
           </p>
