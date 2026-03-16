@@ -3,7 +3,7 @@
 import type * as THREE from 'three';
 import { useEffect, useLayoutEffect, useRef, useState, useCallback, Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCategoryFilter } from '@/contexts/CategoryFilterContext';
 import { useSplash } from '@/contexts/SplashContext';
 import type { ProjectModalProject } from '@/components/ProjectModal';
@@ -1321,6 +1321,7 @@ function hitTestWorkNode(
 
 export default function NeuralPortfolio() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const pathname = usePathname();
   const router = useRouter();
   const [hovered, setHovered] = useState<HoveredWork | null>(null);
   const [cardVisible, setCardVisible] = useState(false);
@@ -1553,6 +1554,15 @@ export default function NeuralPortfolio() {
 
   const [mobilePreview, setMobilePreview] = useState<WorkItem | null>(null);
   const [mobilePreviewVisible, setMobilePreviewVisible] = useState(false);
+
+  // Clear mobile preview drawer when navigating to a work page (e.g. direct link) so it never flashes
+  useEffect(() => {
+    if (pathname?.startsWith('/work/')) {
+      setMobilePreviewVisible(false);
+      const t = setTimeout(() => setMobilePreview(null), 250);
+      return () => clearTimeout(t);
+    }
+  }, [pathname]);
 
   const [gridHovered, setGridHovered] = useState<{ item: WorkItem; screenX: number; screenY: number } | null>(null);
   const [gridCardVisible, setGridCardVisible] = useState(false);
@@ -2506,7 +2516,7 @@ export default function NeuralPortfolio() {
               params.set('view', next);
               window.history.replaceState(null, '', `?${params.toString()}`);
             }}
-            title={view === 'neural' ? 'Grid view' : 'Network view'}
+            title={view === 'neural' ? 'Card view' : 'Neural view'}
             style={{
               background: 'none',
               border: 'none',

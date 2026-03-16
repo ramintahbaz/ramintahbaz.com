@@ -13,7 +13,7 @@ export default function NeuralPortfolioLayer() {
         position: 'fixed',
         inset: 0,
         zIndex: 0,
-        display: pathname === '/' ? 'block' : 'none',
+        display: pathname === '/' && !pathname.startsWith('/work/') ? 'block' : 'none',
       }}
     >
       <NeuralPortfolio />

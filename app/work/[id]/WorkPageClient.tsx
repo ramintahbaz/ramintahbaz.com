@@ -36,8 +36,15 @@ export function WorkPageClient({ id }: WorkPageClientProps) {
         padding: '0 0 80px',
       }}
     >
-      {/* Content */}
-      <div style={{ padding: '32px 20px 0' }}>
+      {/* Content — responsive: narrow on mobile, centered max-width on desktop */}
+      <div
+        style={{
+          padding: '32px 20px 0',
+          maxWidth: 720,
+          margin: '0 auto',
+          boxSizing: 'border-box',
+        }}
+      >
         <div style={{
           fontSize: 11,
           fontFamily: 'var(--font-geist-mono), monospace',

@@ -259,7 +259,7 @@ export default function TopBar() {
             params.set('view', next);
             router.replace(`/?${params.toString()}`);
           }}
-          title={view === 'neural' ? 'Grid view' : 'Network view'}
+          title={view === 'neural' ? 'Grid view' : 'Neural view'}
           className="flex items-center gap-1 font-mono text-[11px] text-white/70 hover:text-white transition-colors pr-4"
           aria-label={view === 'neural' ? 'Switch to grid view' : 'Switch to network view'}
         >
