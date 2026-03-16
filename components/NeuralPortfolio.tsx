@@ -1376,6 +1376,12 @@ export default function NeuralPortfolio() {
       viewRef.current = v;
     }
   }, [searchParams]);
+  // When switching views (grid ↔ neural), close the mobile preview drawer so it doesn't stay open in the new view.
+  useEffect(() => {
+    setMobilePreviewVisible(false);
+    const t = setTimeout(() => setMobilePreview(null), 250);
+    return () => clearTimeout(t);
+  }, [view]);
   const VIEW_TOGGLE_USED_KEY = 'viewToggleUsed';
   const [viewToggleUsed, setViewToggleUsed] = useState(false);
   const viewToggledByTouchRef = useRef(false);
@@ -2325,6 +2331,33 @@ export default function NeuralPortfolio() {
           </p>
         </div>
       )}
+      {/* Bio block — mobile neural view: fixed, same horizontal padding as grid/filter; above menu */}
+      {isMobile && view === 'neural' && (
+        <div style={{
+          position: 'fixed',
+          left: 12,
+          right: 12,
+          bottom: 100,
+          zIndex: 10,
+          pointerEvents: 'none',
+        }}>
+          <p style={{
+            margin: 0,
+            fontSize: 11,
+            color: 'rgba(255,255,255,0.9)',
+            fontFamily: 'var(--font-geist-sans), sans-serif',
+            fontWeight: 400,
+            lineHeight: 1.7,
+            transition: 'opacity 0.4s ease',
+          }}>
+            {categoryFilter === 'all' && `Building fintech interfaces and experimenting with the details that make software feel invisible. Design engineer at Promise.`}
+            {categoryFilter === 'interaction' && `Interactions are the punctuation in a product. Easy to miss when they're right, impossible to ignore when they're off. The best ones feel like the interface already knew what you were going to do.`}
+            {categoryFilter === 'product' && `Good product stays quiet. It gets out of the way so the person using it feels capable. From idea to shipped, full ownership of every decision.`}
+            {categoryFilter === 'film' && `Film is just another way to control what someone feels and when. Swap a component for a lens, a transition for a cut. The problem is the same. Earn attention, hold it, leave the audience somewhere they didn't expect.`}
+            {categoryFilter === 'writing' && `These pieces move across technology, craft, and sometimes love. None of them are conclusions — just thoughts that needed somewhere to go. A way to think out loud, share what's on my mind, and see where it lands.`}
+          </p>
+        </div>
+      )}
       {/* Black overlay: fade in over 500ms during transition */}
       <div
         aria-hidden
@@ -2353,7 +2386,7 @@ export default function NeuralPortfolio() {
             backdropFilter: 'blur(16px)',
             background: 'rgba(28,28,32,0.92)',
             border: '1px solid rgba(255,255,255,0.06)',
-            borderRadius: 12,
+            borderRadius: 8,
             padding: isMobile ? '4px 6px' : '5px 10px 5px 8px',
             boxShadow: '0 8px 32px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.15)',
             pointerEvents: 'auto',
@@ -2970,7 +3003,7 @@ function MobilePreviewCard({ item, visible, onNavigate, onDismiss }: {
               width: '100%',
               background: 'rgba(255,255,255,0.02)',
               border: '0.5px solid rgba(255,255,255,0.04)',
-              borderRadius: 9999,
+              borderRadius: 12,
               backdropFilter: 'blur(16px)',
               WebkitBackdropFilter: 'blur(16px)',
               boxShadow: '0 2px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.08)',
