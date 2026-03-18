@@ -64,10 +64,12 @@ function NeuralPreviewCard({
   onNavigate,
   dimmed,
   hideWhenFiltered,
+  isMobile,
 }: {
   onNavigate: () => void;
   dimmed?: boolean;
   hideWhenFiltered?: boolean;
+  isMobile: boolean;
 }) {
   const cardRef = useRef<HTMLAnchorElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -203,7 +205,9 @@ function NeuralPreviewCard({
           bottom: 0,
           padding: '20px 16px 18px',
           minHeight: 56,
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.08) 70%, rgba(0,0,0,0.22) 80%, rgba(0,0,0,0.45) 90%, rgba(0,0,0,0.7) 100%)',
+          background: isMobile
+            ? 'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0.15) 55%, rgba(0,0,0,0.35) 70%, rgba(0,0,0,0.6) 85%, rgba(0,0,0,0.85) 100%)'
+            : 'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.08) 70%, rgba(0,0,0,0.22) 80%, rgba(0,0,0,0.45) 90%, rgba(0,0,0,0.7) 100%)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -403,7 +407,7 @@ const MasonryCard = memo(function MasonryCard({
               objectFit: 'cover',
               aspectRatio: '4/3',
               ...(cardImage === '/images/essays/retro_vintage.png'
-                ? { transform: 'scale(1.1)', transformOrigin: 'center center' }
+                ? { transform: `scale(${isMobile ? 1.2 : 1.1})`, transformOrigin: 'center center' }
                 : {}),
             }}
           />
@@ -457,7 +461,9 @@ const MasonryCard = memo(function MasonryCard({
           bottom: 0,
           padding: '20px 16px 18px',
           minHeight: 56,
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.08) 70%, rgba(0,0,0,0.22) 80%, rgba(0,0,0,0.45) 90%, rgba(0,0,0,0.7) 100%)',
+          background: isMobile
+            ? 'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0.15) 55%, rgba(0,0,0,0.35) 70%, rgba(0,0,0,0.6) 85%, rgba(0,0,0,0.85) 100%)'
+            : 'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.08) 70%, rgba(0,0,0,0.22) 80%, rgba(0,0,0,0.45) 90%, rgba(0,0,0,0.7) 100%)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -666,6 +672,7 @@ export default function CraftPage() {
                 onNavigate={handleNeuralPreviewClick}
                 dimmed={filter !== 'all' && filter !== 'interaction'}
                 hideWhenFiltered={filter !== 'all' && filter !== 'interaction'}
+                isMobile={isMobile}
               />
               {/* Rest: FedCaddy (5) ↔ Engineering at Promise (11) swapped */}
               {[1, 3, 4, 11, 6, 7, 8, 9, 10, 5, 12, 13, 14, 16, 17, 18, 19, 20].map((i) => {
@@ -698,6 +705,7 @@ export default function CraftPage() {
                 onNavigate={handleNeuralPreviewClick}
                 dimmed={filter !== 'all' && filter !== 'interaction'}
                 hideWhenFiltered={filter !== 'all' && filter !== 'interaction'}
+                isMobile={isMobile}
               />
               {WORK_ITEMS[2] && (
                 <MasonryCard
