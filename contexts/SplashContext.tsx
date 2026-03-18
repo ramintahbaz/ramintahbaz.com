@@ -11,6 +11,7 @@ const SplashContext = createContext<SplashContextValue | null>(null);
 
 export function SplashProvider({ children }: { children: ReactNode }) {
   const [splashDone, setSplashDone] = useState(false);
+
   return (
     <SplashContext.Provider value={{ splashDone, setSplashDone }}>
       {children}

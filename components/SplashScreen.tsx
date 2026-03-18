@@ -42,10 +42,9 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'flex-start',
-            paddingTop: isMobile ? 24 : 'clamp(24px, 4vw, 48px)',
+            paddingBottom: isMobile ? 48 : 'clamp(80px, 12vw, 162px)',
+            paddingLeft: isMobile ? 20 : 'clamp(24px, 4vw, 77px)',
             paddingRight: isMobile ? 12 : 'clamp(24px, 4vw, 48px)',
-            paddingBottom: isMobile ? 100 : 'clamp(80px, 12vw, 162px)',
-            paddingLeft: isMobile ? 12 : 'clamp(24px, 4vw, 77px)',
             textAlign: 'left',
             direction: 'ltr',
           }}
@@ -54,9 +53,11 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
             style={{
               maxWidth: 480,
               position: 'relative',
-              minHeight: '5.5em',
-              padding: '12px 16px',
-              transform: isMobile ? 'translateY(40px)' : 'none',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'flex-start',
+              gap: 4,
+              minHeight: isMobile ? '3em' : '4.5em',
             }}
           >
             <motion.p
@@ -83,7 +84,6 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
                   transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
                   style={{
                     margin: 0,
-                    marginTop: isMobile ? 8 : 2,
                     fontSize: isMobile ? 'clamp(12px, 2vw, 14px)' : 'clamp(11px, 1.8vw, 15px)',
                     color: 'rgba(255,255,255,0.7)',
                     fontFamily: 'var(--font-geist-mono), monospace',

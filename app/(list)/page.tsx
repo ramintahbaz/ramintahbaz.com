@@ -1,7 +1,7 @@
 'use client';
 
 import { use } from 'react';
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import SplashScreen from '@/components/SplashScreen';
 import { useSplash } from '@/contexts/SplashContext';
 
@@ -26,8 +26,7 @@ export default function Home({ searchParams }: PageProps) {
   // Unwrap per Next.js 16: searchParams is a Promise and must not be enumerated or accessed directly
   use(searchParams ?? EMPTY_SEARCH_PARAMS);
 
-  const [splashDone, setSplashDone] = useState(false);
-  const { setSplashDone: setSplashDoneContext } = useSplash();
+  const { splashDone, setSplashDone } = useSplash();
 
   useEffect(() => {
     (document.activeElement as HTMLElement)?.blur();
@@ -37,15 +36,13 @@ export default function Home({ searchParams }: PageProps) {
     if (localStorage.getItem('leftForWork') === 'true') {
       localStorage.removeItem('leftForWork');
       setSplashDone(true);
-      setSplashDoneContext(true);
     }
-  }, [setSplashDoneContext]);
+  }, [setSplashDone]);
 
   const handleComplete = useCallback(() => {
     setSplashDone(true);
-    setSplashDoneContext(true);
     if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('splashDone', 'true');
-  }, [setSplashDoneContext]);
+  }, [setSplashDone]);
 
   // List (CraftPage) is rendered by (list)/layout when splashDone; we only render splash here
   return (
