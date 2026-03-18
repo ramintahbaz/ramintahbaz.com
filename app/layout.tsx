@@ -27,7 +27,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ramin Tahbaz - Design Engineer",
+  title: "Ramin Tahbaz — Design Engineer",
   description:
     "Designer who codes, working across product, film, hardware, and writing. Self-taught, learning by doing.",
   themeColor: "#000000",
@@ -44,17 +44,17 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "Ramin Tahbaz - Design Engineer",
+    title: "Ramin Tahbaz — Design Engineer",
     description:
       "Designer who codes, working across product, film, hardware, and writing. Self-taught, learning by doing.",
     url: "https://ramintahbaz.com",
-    siteName: "Ramin Tahbaz - Design Engineer",
+    siteName: "Ramin Tahbaz — Design Engineer",
     images: [
       {
         url: "/images/share-og.png",
         width: 1200,
         height: 630,
-        alt: "Ramin Tahbaz - Design Engineer",
+        alt: "Ramin Tahbaz — Design Engineer",
       },
     ],
     locale: "en_US",
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ramin Tahbaz - Design Engineer",
+    title: "Ramin Tahbaz — Design Engineer",
     description:
       "Designer who codes, working across product, film, hardware, and writing. Self-taught, learning by doing.",
     images: ["/images/share-og.png"],
