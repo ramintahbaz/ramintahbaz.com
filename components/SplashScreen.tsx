@@ -19,14 +19,20 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
   }, []);
 
   useEffect(() => {
-    const t1 = setTimeout(() => setShowSecond(true), 700);
-    const t2 = setTimeout(() => setVisible(false), 2600);
-    const t3 = setTimeout(() => onComplete(), 3200);
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
+    const start = () => {
+      const t1 = setTimeout(() => setShowSecond(true), 700);
+      const t2 = setTimeout(() => setVisible(false), 2600);
+      const t3 = setTimeout(() => onComplete(), 3200);
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+        clearTimeout(t3);
+      };
     };
+    if (document.readyState === 'complete') return start();
+    const handler = () => start();
+    window.addEventListener('load', handler, { once: true });
+    return () => window.removeEventListener('load', handler);
   }, [onComplete]);
 
   return (

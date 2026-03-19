@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useLayoutEffect } from 'react';
+import { useState, useLayoutEffect, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useSplash } from '@/contexts/SplashContext';
@@ -17,10 +17,20 @@ export default function NeuralPortfolioLayer() {
   const showNeural = pathname === '/';
   const isSplashMode = pathname === '/' && !splashDone;
   const [pastFirstFrame, setPastFirstFrame] = useState(false);
+  const [canInitThree, setCanInitThree] = useState(false);
 
   useLayoutEffect(() => {
     setPastFirstFrame(true);
   }, []);
+
+  useEffect(() => {
+    if (!splashDone) {
+      setCanInitThree(false);
+      return;
+    }
+    const id = window.setTimeout(() => setCanInitThree(true), 500);
+    return () => clearTimeout(id);
+  }, [splashDone]);
 
   const showLayer = showNeural && (!isSplashMode || pastFirstFrame);
   const isExplicitNeuralView = searchParams.get('view') === 'neural';
@@ -35,7 +45,7 @@ export default function NeuralPortfolioLayer() {
         display: showLayer ? 'block' : 'none',
       }}
     >
-      {(showLayer && pastFirstFrame) && (
+      {canInitThree && (
         <NeuralPortfolio isLayerVisible={showLayer} splashMode={splashMode} />
       )}
     </div>
