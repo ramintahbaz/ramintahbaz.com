@@ -5,6 +5,8 @@
   --foreground: #171717;
   /* Full-page dark shell (home, portfolio); single source for canvas + chrome */
   --app-canvas: #161616;
+  /* NeuralPortfolio full-bleed shell + TopBar when view=neural */
+  --neural-canvas: #050508;
 }
 
 @theme inline {
@@ -46,6 +48,10 @@ body {
    "transparent" is transparent black in sRGB and skews the mix darker than the canvas. */
 .bg-top-bar {
   background-color: rgb(from var(--app-canvas) r g b / 0.7);
+}
+
+.bg-neural-top-bar {
+  background-color: var(--neural-canvas);
 }
 
 .splash-hidden {

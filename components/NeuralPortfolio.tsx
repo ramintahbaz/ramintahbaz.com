@@ -2013,7 +2013,7 @@ export default function NeuralPortfolio({ isLayerVisible = true, splashMode = fa
   const isTransitioning = !!transitioningToHref;
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: '#050508', fontFamily: "'Outfit', sans-serif" }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'var(--neural-canvas)', fontFamily: "'Outfit', sans-serif" }}>
       <style dangerouslySetInnerHTML={{ __html: '@keyframes gridFadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } } @keyframes bentoCardEntry { from { transform: translateY(20px); } to { transform: translateY(0); } } @keyframes neuralDot { 0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.25; } 50% { transform: translate(6px, -10px) scale(1.15); opacity: 0.5; } } @keyframes neuralTwinkle { 0%, 100% { opacity: 0.2; transform: scale(0.85); } 50% { opacity: 0.6; transform: scale(1.1); } } @keyframes neuralWeb { 0%, 100% { opacity: 0.12; } 50% { opacity: 0.22; } }' }} />
       {/* Neural network wrapper — dimmed in grid view; in neural view fades in via neuralRevealed */}
       <div

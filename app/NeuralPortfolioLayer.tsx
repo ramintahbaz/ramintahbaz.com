@@ -43,7 +43,7 @@ export default function NeuralPortfolioLayer() {
         display: showLayer ? 'block' : 'none',
       }}
     >
-      {(showLayer && pastFirstFrame) && isMobile && (
+      {(showLayer && pastFirstFrame) && (isMobile || isExplicitNeuralView) && (
         <NeuralPortfolio isLayerVisible={showLayer} splashMode={splashMode} />
       )}
     </div>
