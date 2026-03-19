@@ -87,7 +87,7 @@ export default async function RootLayout({
   };
 
   return (
-    <html lang="en" style={{ backgroundColor: '#000' }}>
+    <html lang="en" style={{ backgroundColor: '#161616' }}>
       <head>
         <script
           suppressHydrationWarning
@@ -105,8 +105,8 @@ export default async function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${ibmPlexMono.variable} font-sans antialiased bg-black`}
-        style={{ backgroundColor: '#000', minHeight: '100dvh' }}
+        className={`${geistSans.variable} ${geistMono.variable} ${ibmPlexMono.variable} font-sans antialiased`}
+        style={{ backgroundColor: '#161616', minHeight: '100dvh' }}
       >
         <Script
           id="bfcache-detect"
@@ -136,8 +136,8 @@ export default async function RootLayout({
               <TopBar />
             </Suspense>
             <div
-              className="pt-12 bg-black"
-              style={{ height: '100dvh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
+              className="pt-12"
+              style={{ height: '100dvh', overflow: 'hidden', display: 'flex', flexDirection: 'column', backgroundColor: '#161616' }}
             >
               <Suspense fallback={null}>
               <NeuralPortfolioLayer />

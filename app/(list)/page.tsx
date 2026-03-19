@@ -3,6 +3,7 @@
 import { use } from 'react';
 import { useEffect, useCallback } from 'react';
 import SplashScreen from '@/components/SplashScreen';
+import MobileVideoPreloader from '@/components/MobileVideoPreloader';
 import { useSplash } from '@/contexts/SplashContext';
 
 const EMPTY_SEARCH_PARAMS = Promise.resolve({} as { [key: string]: string | string[] | undefined });
@@ -47,6 +48,7 @@ export default function Home({ searchParams }: PageProps) {
   // List (CraftPage) is rendered by (list)/layout when splashDone; we only render splash here
   return (
     <>
+      <MobileVideoPreloader />
       {!splashDone && <SplashScreen onComplete={handleComplete} />}
       <div className={!splashDone ? 'splash-hidden' : ''} />
     </>

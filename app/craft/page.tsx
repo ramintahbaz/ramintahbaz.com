@@ -85,7 +85,7 @@ function NeuralPreviewCard({
         for (const e of entries) {
           if (e.isIntersecting) {
             if (!srcSetRef.current) {
-              video.src = '/videos/neural_video.mp4';
+              video.src = '/videos/neural.mp4';
               srcSetRef.current = true;
             }
             video.play().catch(() => {});
@@ -122,7 +122,8 @@ function NeuralPreviewCard({
         opacity: dimmed ? 0.25 : 1,
         transition: 'opacity 0.2s ease',
         background: '#0a0a0a',
-        border: '1px solid rgba(255,255,255,0.06)',
+        border: '3px solid #1C1C1C',
+        boxShadow: '0 0 0 1px #2E2E2E, 0 0 12px rgba(0,0,0,0.2)',
       }}
       className="work-masonry-card"
     >
@@ -333,7 +334,8 @@ const MasonryCard = memo(function MasonryCard({
         opacity: dimmed ? 0.25 : 1,
         transition: 'opacity 0.2s ease',
         background: '#111',
-        border: '1px solid rgba(255,255,255,0.06)',
+        border: '3px solid #1C1C1C',
+        boxShadow: '0 0 0 1px #2E2E2E, 0 0 12px rgba(0,0,0,0.2)',
       }}
       className="work-masonry-card"
     >

@@ -1099,6 +1099,9 @@ export default function NeuralPortfolio({ isLayerVisible = true, splashMode = fa
   const [gridRevealed, setGridRevealed] = useState(false);
   const [hasSeenGridBefore, setHasSeenGridBefore] = useState(false);
   const [returnedFromProject, setReturnedFromProject] = useState(false);
+  const [mobilePreloadVideosReady] = useState(() =>
+    typeof window !== 'undefined' && sessionStorage.getItem('mobilePreloadVideosReady') === 'true'
+  );
   const searchParams = useSearchParams();
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -2055,7 +2058,7 @@ export default function NeuralPortfolio({ isLayerVisible = true, splashMode = fa
                       year={PROJECT_DETAILS[item.id]?.year}
                       minHeight={100}
                       isMobile={isMobile}
-                      skipEntryAnimation={hasSeenGridBefore || returnedFromProject}
+                      skipEntryAnimation={hasSeenGridBefore || returnedFromProject || (isMobile && i < 2 && mobilePreloadVideosReady)}
                       startEntryAnimation={splashDone}
                       onSelect={() => {
                         if (isMobile) {
@@ -2268,7 +2271,7 @@ export default function NeuralPortfolio({ isLayerVisible = true, splashMode = fa
                   >
                     {/* Simplified neural-style dots (non-interactive); above gradient so they’re visible */}
                     <video
-                      src="/videos/neural_video.mp4"
+                      src="/videos/neural.mp4"
                       muted
                       loop
                       playsInline
@@ -2407,8 +2410,8 @@ export default function NeuralPortfolio({ isLayerVisible = true, splashMode = fa
         </div>
       )}
 
-      {/* Bio block — desktop: fixed bottom-left (both views); padding above filter menu — hidden during splash */}
-      {!isMobile && !splashMode && (
+      {/* Bio block — desktop: fixed bottom-left (grid view only); hidden in neural view and during splash */}
+      {!isMobile && !splashMode && view === 'grid' && (
         <div style={{
           position: 'fixed',
           bottom: 95,
@@ -2434,33 +2437,7 @@ export default function NeuralPortfolio({ isLayerVisible = true, splashMode = fa
           </p>
         </div>
       )}
-      {/* Bio block — mobile neural view: fixed, same horizontal padding as grid/filter; above menu — hidden during splash */}
-      {isMobile && view === 'neural' && !splashMode && (
-        <div style={{
-          position: 'fixed',
-          left: 12,
-          right: 12,
-          bottom: 100,
-          zIndex: 10,
-          pointerEvents: 'none',
-        }}>
-          <p style={{
-            margin: 0,
-            fontSize: 11,
-            color: 'rgba(255,255,255,0.9)',
-            fontFamily: 'var(--font-geist-sans), sans-serif',
-            fontWeight: 400,
-            lineHeight: 1.7,
-            transition: 'opacity 0.4s ease',
-          }}>
-            {categoryFilter === 'all' && `Building fintech interfaces and experimenting with the details that make software feel invisible. Design engineer at Promise.`}
-            {categoryFilter === 'interaction' && `Interactions are the punctuation in a product. Easy to miss when they're right, impossible to ignore when they're off. The best ones feel like the interface already knew what you were going to do.`}
-            {categoryFilter === 'product' && `Good product stays quiet. It gets out of the way so the person using it feels capable. From idea to shipped, full ownership of every decision.`}
-            {categoryFilter === 'film' && `Film is just another way to control what someone feels and when. Swap a component for a lens, a transition for a cut. The problem is the same. Earn attention, hold it, leave the audience somewhere they didn't expect.`}
-            {categoryFilter === 'writing' && `These pieces move across technology, craft, and sometimes love. None of them are conclusions — just thoughts that needed somewhere to go. A way to think out loud, share what's on my mind, and see where it lands.`}
-          </p>
-        </div>
-      )}
+      {/* Bio block — mobile neural view: hidden (no copy on neural view) */}
       {/* Black overlay: fade in over 500ms during transition */}
       <div
         aria-hidden
