@@ -648,108 +648,40 @@ export default function CraftPage() {
             padding: '72px 24px 24px',
           }}
         >
-          {isMobile ? (
-            <>
-              {WORK_ITEMS[0] && (
-                <MasonryCard
-                  key={WORK_ITEMS[0].id}
-                  item={WORK_ITEMS[0]}
-                  onNavigate={() => handleCardClick(WORK_ITEMS[0]!)}
-                  dimmed={filter !== 'all' && WORK_ITEMS[0].category !== filter}
-                  hideWhenFiltered={filter !== 'all' && WORK_ITEMS[0].category !== filter}
-                  isMobile={true}
-                />
-              )}
-              {WORK_ITEMS[15] && (
-                <MasonryCard
-                  key={WORK_ITEMS[15].id}
-                  item={WORK_ITEMS[15]}
-                  onNavigate={() => handleCardClick(WORK_ITEMS[15]!)}
-                  dimmed={filter !== 'all' && WORK_ITEMS[15].category !== filter}
-                  hideWhenFiltered={filter !== 'all' && WORK_ITEMS[15].category !== filter}
-                  isMobile={true}
-                />
-              )}
-              {WORK_ITEMS[2] && (
-                <MasonryCard
-                  key={WORK_ITEMS[2].id}
-                  item={WORK_ITEMS[2]}
-                  onNavigate={() => handleCardClick(WORK_ITEMS[2]!)}
-                  dimmed={filter !== 'all' && WORK_ITEMS[2].category !== filter}
-                  hideWhenFiltered={filter !== 'all' && WORK_ITEMS[2].category !== filter}
-                  isMobile={true}
-                />
-              )}
+          {(isMobile
+            ? [
+                { type: 'work' as const, index: 0 },
+                { type: 'work' as const, index: 15 },
+                { type: 'work' as const, index: 2 },
+                { type: 'neural' as const },
+                ...[1, 3, 4, 11, 6, 7, 8, 9, 10, 5, 12, 13, 14, 16, 17, 18, 19, 20].map((index) => ({ type: 'work' as const, index })),
+              ]
+            : [
+                { type: 'work' as const, index: 0 },
+                { type: 'neural' as const },
+                { type: 'work' as const, index: 2 },
+                { type: 'work' as const, index: 1 },
+                ...Array.from({ length: WORK_ITEMS.length - 3 }, (_, i) => ({ type: 'work' as const, index: i + 3 })),
+              ]
+          ).map((slot) =>
+            slot.type === 'neural' ? (
               <NeuralPreviewCard
+                key="neural-preview"
                 onNavigate={handleNeuralPreviewClick}
                 dimmed={filter !== 'all' && filter !== 'interaction'}
                 hideWhenFiltered={filter !== 'all' && filter !== 'interaction'}
                 isMobile={isMobile}
               />
-              {/* Rest: FedCaddy (5) ↔ Engineering at Promise (11) swapped */}
-              {[1, 3, 4, 11, 6, 7, 8, 9, 10, 5, 12, 13, 14, 16, 17, 18, 19, 20].map((i) => {
-                const item = WORK_ITEMS[i];
-                return item ? (
-                  <MasonryCard
-                    key={item.id}
-                    item={item}
-                    onNavigate={() => handleCardClick(item)}
-                    dimmed={filter !== 'all' && item.category !== filter}
-                    hideWhenFiltered={filter !== 'all' && item.category !== filter}
-                    isMobile={true}
-                  />
-                ) : null;
-              })}
-            </>
-          ) : (
-            <>
-              {WORK_ITEMS[0] && (
-                <MasonryCard
-                  key={WORK_ITEMS[0].id}
-                  item={WORK_ITEMS[0]}
-                  onNavigate={() => handleCardClick(WORK_ITEMS[0]!)}
-                  dimmed={filter !== 'all' && WORK_ITEMS[0].category !== filter}
-                  hideWhenFiltered={filter !== 'all' && WORK_ITEMS[0].category !== filter}
-                  isMobile={false}
-                />
-              )}
-              <NeuralPreviewCard
-                onNavigate={handleNeuralPreviewClick}
-                dimmed={filter !== 'all' && filter !== 'interaction'}
-                hideWhenFiltered={filter !== 'all' && filter !== 'interaction'}
+            ) : WORK_ITEMS[slot.index] ? (
+              <MasonryCard
+                key={WORK_ITEMS[slot.index].id}
+                item={WORK_ITEMS[slot.index]}
+                onNavigate={() => handleCardClick(WORK_ITEMS[slot.index]!)}
+                dimmed={filter !== 'all' && WORK_ITEMS[slot.index].category !== filter}
+                hideWhenFiltered={filter !== 'all' && WORK_ITEMS[slot.index].category !== filter}
                 isMobile={isMobile}
               />
-              {WORK_ITEMS[2] && (
-                <MasonryCard
-                  key={WORK_ITEMS[2].id}
-                  item={WORK_ITEMS[2]}
-                  onNavigate={() => handleCardClick(WORK_ITEMS[2]!)}
-                  dimmed={filter !== 'all' && WORK_ITEMS[2].category !== filter}
-                  hideWhenFiltered={filter !== 'all' && WORK_ITEMS[2].category !== filter}
-                  isMobile={false}
-                />
-              )}
-              {WORK_ITEMS[1] && (
-                <MasonryCard
-                  key={WORK_ITEMS[1].id}
-                  item={WORK_ITEMS[1]}
-                  onNavigate={() => handleCardClick(WORK_ITEMS[1]!)}
-                  dimmed={filter !== 'all' && WORK_ITEMS[1].category !== filter}
-                  hideWhenFiltered={filter !== 'all' && WORK_ITEMS[1].category !== filter}
-                  isMobile={false}
-                />
-              )}
-              {WORK_ITEMS.slice(3).map((item) => (
-                <MasonryCard
-                  key={item.id}
-                  item={item}
-                  onNavigate={() => handleCardClick(item)}
-                  dimmed={filter !== 'all' && item.category !== filter}
-                  hideWhenFiltered={filter !== 'all' && item.category !== filter}
-                  isMobile={false}
-                />
-              ))}
-            </>
+            ) : null
           )}
         </motion.div>
       </div>
