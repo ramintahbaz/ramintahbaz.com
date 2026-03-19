@@ -1832,7 +1832,7 @@ export default function NeuralPortfolio({ isLayerVisible = true, splashMode = fa
     }
 
     let idleHandle: number | undefined;
-    let fallbackHandle: ReturnType<typeof setTimeout> | undefined;
+    let fallbackHandle: ReturnType<typeof window.setTimeout> | undefined;
     let cleanupPromise: Promise<(() => void) | void> | undefined;
 
     const runInit = () => {
