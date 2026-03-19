@@ -216,7 +216,12 @@ export default function TopBar() {
     <>
       <style dangerouslySetInnerHTML={{ __html: '@keyframes viewIconShimmer { 0% { opacity: 0.55; } 25% { opacity: 1; } 50% { opacity: 0.7; } 75% { opacity: 1; } 100% { opacity: 1; } }' }} />
       <header
-        className="fixed inset-x-0 top-0 z-[100] flex items-center justify-between bg-[#161616] px-4 py-2 text-white font-sans"
+        className="fixed inset-x-0 top-0 z-[100] flex items-center justify-between px-4 py-2 text-white font-sans"
+        style={{
+          backgroundColor: 'rgba(22, 22, 22, 0.55)',
+          backdropFilter: 'blur(14px)',
+          WebkitBackdropFilter: 'blur(14px)',
+        }}
       >
       {/* Mobile: avatar + GitHub · Connect · X left-aligned, filter right — avatar uses client nav to avoid refresh and keep view preference */}
       <div className="flex md:hidden items-center justify-between w-full text-[11px] font-medium">

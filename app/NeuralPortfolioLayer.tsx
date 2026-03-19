@@ -14,7 +14,7 @@ export default function NeuralPortfolioLayer() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { splashDone } = useSplash();
-  const showNeural = pathname === '/' && (searchParams.get('view') === 'neural' || !splashDone);
+  const showNeural = pathname === '/';
   const isSplashMode = pathname === '/' && !splashDone;
   const [pastFirstFrame, setPastFirstFrame] = useState(false);
   const [canInitThree, setCanInitThree] = useState(false);
