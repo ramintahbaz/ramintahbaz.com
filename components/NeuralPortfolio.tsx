@@ -1455,6 +1455,7 @@ export default function NeuralPortfolio({ isLayerVisible = true, splashMode = fa
   const bloomPassRef = useRef<any>(null);
   const controlsRef = useRef<any>(null);
   const rendererRef = useRef<any>(null);
+  const firstFrameRendered = useRef<boolean>(false);
 
   const { categoryFilter, setCategoryFilter } = useCategoryFilter();
   const categoryFilterRef = useRef(categoryFilter);
@@ -1491,6 +1492,7 @@ export default function NeuralPortfolio({ isLayerVisible = true, splashMode = fa
       renderer.setSize(W, H);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.setClearColor(0x000000);
+      renderer.domElement.style.opacity = '0';
       rendererRef.current = renderer;
 
       const scene = new THREE.Scene();
@@ -1771,6 +1773,13 @@ export default function NeuralPortfolio({ isLayerVisible = true, splashMode = fa
       const clock = new THREE.Clock();
       let rotationPhase = 0;
       const ROTATION_PHASE_RATE = 0.04;
+      const fadeInCanvasAfterFirstFrame = () => {
+        if (firstFrameRendered.current) return;
+        const el = renderer.domElement;
+        el.style.transition = 'opacity 1s ease';
+        el.style.opacity = '1';
+        firstFrameRendered.current = true;
+      };
       function animate() {
         animId = requestAnimationFrame(animate);
         const t = clock.getElapsedTime();
@@ -1789,6 +1798,7 @@ export default function NeuralPortfolio({ isLayerVisible = true, splashMode = fa
           (stars.material as THREE.ShaderMaterial).uniforms.uTime.value = t;
           controls.update();
           composer.render();
+          fadeInCanvasAfterFirstFrame();
           return;
         }
 
@@ -1810,6 +1820,7 @@ export default function NeuralPortfolio({ isLayerVisible = true, splashMode = fa
         }
         controls.update();
         composer.render();
+        fadeInCanvasAfterFirstFrame();
       }
       animate();
 
