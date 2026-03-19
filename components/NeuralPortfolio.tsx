@@ -2849,12 +2849,12 @@ const MOBILE_PREVIEW_CATEGORY_LABELS: Record<string, string> = {
 const MOBILE_PREVIEW_MODAL_WIDTH = 'min(88vw, 320px)';
 const MOBILE_PREVIEW_CARD_HEIGHT = 300;
 
-const SHOWREEL_VIDEO = '/videos/document intelligent review.mp4';
+const SHOWREEL_VIDEO = '/videos/document_review_preview.mp4';
 const SHOWREEL_ANCHOR_ID = 'visual-system-hover'; // desktop: showreel placed to the right of this card
 
 const SHOWREEL_ITEMS = [
   { id: 'photoboom', title: 'PhotoBoom', video: '/videos/photo_boom_video.mp4', href: '/photoboom' },
-  { id: 'ai-document-verification', title: 'Intelligent Document Review', video: '/videos/document intelligent review.mp4', href: '/products/ai-document-verification' },
+  { id: 'ai-document-verification', title: 'Intelligent Document Review', video: '/videos/document_review_preview.mp4', href: '/products/ai-document-verification' },
   { id: 'co-creator', title: 'Co-Creator', video: '/images/co-creator/taste%20%E2%86%92%20system%20demo.mp4', href: '/products/co-creator' },
   { id: 'keycadets', title: 'keycadets (acquired)', video: '/images/keycadets/248285912_4711445322210021_8637902604872814185_n.MOV', href: '/products/keycadets' },
   { id: 'carousel', title: 'Netflix Film Scroll', video: '/videos/netflix_scroll.mp4', href: '/interactions/carousel' },

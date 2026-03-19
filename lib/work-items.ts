@@ -197,7 +197,7 @@ export const WORK_ITEMS: WorkItem[] = [
     title: 'Intelligent Document Review',
     category: 'product',
     thumbnail: '/thumbnails/ai-document-verification.jpg',
-    video: '/videos/document intelligent review.mp4',
+    video: '/videos/document_review_preview.mp4',
     videoObjectFit: 'cover',
     videoFullLoop: true,
     cardAspectRatio: '3/4',
