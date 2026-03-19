@@ -254,6 +254,7 @@ const MasonryCard = memo(function MasonryCard({
   const [isLoaded, setIsLoaded] = useState(false);
   const hasVideo = !!item.video;
   const cardImage = item.cardImage;
+  const useImageOnCard = !!cardImage;
 
   // Both observers: attach after one frame so scroll restore has run; reset video on unmount
   useEffect(() => {
@@ -271,7 +272,8 @@ const MasonryCard = memo(function MasonryCard({
             if (!e.isIntersecting) continue;
             const video = videoRef.current;
             if (!srcSetRef.current && video && item.video) {
-              video.src = `${item.video}#t=0.01`;
+              const start = item.videoStart ?? 0;
+              video.src = `${item.video}#t=${start === 0 ? 0.01 : start}`;
               srcSetRef.current = true;
             }
             io1?.disconnect();
@@ -339,7 +341,31 @@ const MasonryCard = memo(function MasonryCard({
       }}
       className="work-masonry-card"
     >
-      {hasVideo ? (
+      {useImageOnCard ? (
+        <div
+          style={{
+            width: '100%',
+            aspectRatio: isMobile ? '4/3' : (item.cardAspectRatio ?? '4/3'),
+            overflow: 'hidden',
+            display: 'block',
+          }}
+        >
+          <img
+            src={cardImage!}
+            alt=""
+            style={{
+              width: '100%',
+              height: '100%',
+              display: 'block',
+              objectFit: 'cover',
+              aspectRatio: isMobile ? '4/3' : (item.cardAspectRatio ?? '4/3'),
+              ...(cardImage === '/images/essays/retro_vintage.png'
+                ? { transform: `scale(${isMobile ? 1.2 : 1.1})`, transformOrigin: 'center center' }
+                : {}),
+            }}
+          />
+        </div>
+      ) : hasVideo ? (
         <div
           style={{
             position: 'relative',
@@ -353,12 +379,20 @@ const MasonryCard = memo(function MasonryCard({
             ref={videoRef}
             autoPlay
             muted
-            loop
+            loop={item.videoLoopSec == null}
             playsInline
             preload="none"
             onCanPlay={() => {
               if (videoRef.current) videoRef.current.style.opacity = '1';
               setIsLoaded(true);
+            }}
+            onTimeUpdate={() => {
+              const v = videoRef.current;
+              const start = item.videoStart ?? 0;
+              const loopSec = item.videoLoopSec;
+              if (v && loopSec != null && v.currentTime >= start + loopSec) {
+                v.currentTime = start;
+              }
             }}
             style={{
               position: 'absolute',
@@ -390,30 +424,6 @@ const MasonryCard = memo(function MasonryCard({
             }}
           />
         </div>
-      ) : cardImage ? (
-        <div
-          style={{
-            width: '100%',
-            aspectRatio: '4/3',
-            overflow: 'hidden',
-            display: 'block',
-          }}
-        >
-          <img
-            src={cardImage}
-            alt=""
-            style={{
-              width: '100%',
-              height: '100%',
-              display: 'block',
-              objectFit: 'cover',
-              aspectRatio: '4/3',
-              ...(cardImage === '/images/essays/retro_vintage.png'
-                ? { transform: `scale(${isMobile ? 1.2 : 1.1})`, transformOrigin: 'center center' }
-                : {}),
-            }}
-          />
-        </div>
       ) : (
         <div
           style={{
@@ -424,8 +434,8 @@ const MasonryCard = memo(function MasonryCard({
           }}
         />
       )}
-      {/* View Production button — above overlay, visible on hover (desktop) or always (mobile) */}
-      {hasVideo && (
+      {/* View Production button — above overlay, visible on hover (desktop) or always (mobile); hide when card shows image */}
+      {hasVideo && !useImageOnCard && (
         <div
           style={{
             position: 'absolute',
