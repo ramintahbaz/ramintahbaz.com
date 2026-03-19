@@ -17,20 +17,18 @@ export default function NeuralPortfolioLayer() {
   const showNeural = pathname === '/';
   const isSplashMode = pathname === '/' && !splashDone;
   const [pastFirstFrame, setPastFirstFrame] = useState(false);
-  const [canInitThree, setCanInitThree] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useLayoutEffect(() => {
     setPastFirstFrame(true);
   }, []);
 
   useEffect(() => {
-    if (!splashDone) {
-      setCanInitThree(false);
-      return;
-    }
-    const id = window.setTimeout(() => setCanInitThree(true), 500);
-    return () => clearTimeout(id);
-  }, [splashDone]);
+    const check = () => setIsMobile(typeof window !== 'undefined' && window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   const showLayer = showNeural && (!isSplashMode || pastFirstFrame);
   const isExplicitNeuralView = searchParams.get('view') === 'neural';
@@ -45,7 +43,7 @@ export default function NeuralPortfolioLayer() {
         display: showLayer ? 'block' : 'none',
       }}
     >
-      {canInitThree && (
+      {(showLayer && pastFirstFrame) && isMobile && (
         <NeuralPortfolio isLayerVisible={showLayer} splashMode={splashMode} />
       )}
     </div>

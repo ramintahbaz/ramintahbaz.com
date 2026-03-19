@@ -683,10 +683,10 @@ export default function CraftPage() {
           {(isMobile
             ? [
                 { type: 'work' as const, index: CRAFT_RAMIN_SKILL_INDEX },
+                { type: 'neural' as const },
                 { type: 'work' as const, index: 0 },
                 { type: 'work' as const, index: 15 },
                 { type: 'work' as const, index: 2 },
-                { type: 'neural' as const },
                 ...CRAFT_MOBILE_TAIL_INDICES.map((index) => ({
                   type: 'work' as const,
                   index,
@@ -694,8 +694,8 @@ export default function CraftPage() {
               ]
             : [
                 { type: 'work' as const, index: CRAFT_RAMIN_SKILL_INDEX },
-                { type: 'work' as const, index: 0 },
                 { type: 'neural' as const },
+                { type: 'work' as const, index: 0 },
                 { type: 'work' as const, index: 2 },
                 { type: 'work' as const, index: 1 },
                 ...CRAFT_DESKTOP_TAIL_INDICES.map((index) => ({
