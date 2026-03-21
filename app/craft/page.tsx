@@ -278,12 +278,21 @@ const MasonryCard = memo(function MasonryCard({
   const cardRef = useRef<HTMLAnchorElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const srcSetRef = useRef(false);
+  const shouldPlayRef = useRef(false);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
   const hasVideo = !!item.video;
   const cardImage = item.cardImage;
   const useImageOnCard = !!cardImage;
   const eagerVideo = gridIndex < 6;
+
+  const tryPlayIfAppropriate = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (!shouldPlayRef.current) return;
+    if (!video.paused) return;
+    if (video.readyState < 2) return;
+    void video.play().catch(() => {});
+  }, []);
 
   // Lazy src (below fold) + play/pause by visibility; attach after one frame so scroll restore has run
   useEffect(() => {
@@ -319,24 +328,21 @@ const MasonryCard = memo(function MasonryCard({
           for (const e of entries) {
             const video = videoRef.current;
             if (e.isIntersecting) {
-              if (video) {
-                video.play().catch(() => {
-                  // On mobile, browser may suspend video — reset and retry once
-                  video.load();
-                  video.play().catch(() => {});
-                });
-              }
+              shouldPlayRef.current = true;
+              tryPlayIfAppropriate();
             } else {
+              shouldPlayRef.current = false;
               video?.pause();
             }
           }
         },
-        { threshold: 0.2 }
+        { threshold: isMobile ? 0 : 0.2 }
       );
       io2.observe(card);
     });
 
     return () => {
+      shouldPlayRef.current = false;
       cancelAnimationFrame(raf);
       io1?.disconnect();
       io2?.disconnect();
@@ -349,7 +355,7 @@ const MasonryCard = memo(function MasonryCard({
         }
       }
     };
-  }, [hasVideo, gridIndex, eagerVideo, item.video, item.videoStart]);
+  }, [hasVideo, gridIndex, eagerVideo, item.video, item.videoStart, isMobile, tryPlayIfAppropriate]);
 
   const year = item.year ?? '';
   const cardFrameAspect = item.cardAspectRatio ?? '4/3';
@@ -416,18 +422,6 @@ const MasonryCard = memo(function MasonryCard({
             background: '#161616',
           }}
         >
-          {!isPlaying && (
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                backdropFilter: 'blur(12px)',
-                WebkitBackdropFilter: 'blur(12px)',
-                zIndex: 2,
-                pointerEvents: 'none',
-              }}
-            />
-          )}
           <video
             ref={videoRef}
             src={
@@ -440,11 +434,13 @@ const MasonryCard = memo(function MasonryCard({
             loop={item.videoLoopSec == null}
             playsInline
             preload={eagerVideo ? 'metadata' : 'none'}
-            onPlay={() => setIsPlaying(true)}
-            onPause={() => setIsPlaying(false)}
             onCanPlay={() => {
               if (videoRef.current) videoRef.current.style.opacity = '1';
               setIsLoaded(true);
+              tryPlayIfAppropriate();
+            }}
+            onLoadedData={() => {
+              tryPlayIfAppropriate();
             }}
             onTimeUpdate={() => {
               const v = videoRef.current;
