@@ -318,7 +318,13 @@ const MasonryCard = memo(function MasonryCard({
           for (const e of entries) {
             const video = videoRef.current;
             if (e.isIntersecting) {
-              video?.play().catch(() => {});
+              if (video) {
+                video.play().catch(() => {
+                  // On mobile, browser may suspend video — reset and retry once
+                  video.load();
+                  video.play().catch(() => {});
+                });
+              }
             } else {
               video?.pause();
             }
