@@ -8,13 +8,16 @@
     "start": "next start",
     "lint": "eslint",
     "compress-videos": "node scripts/compress-videos.js",
-    "compress-images": "node scripts/compress-images.js"
+    "compress-images": "node scripts/compress-images.js",
+    "upload-videos": "tsx scripts/upload-videos.ts",
+    "update-video-paths": "tsx scripts/update-video-paths.ts"
   },
   "dependencies": {
     "@elevenlabs/elevenlabs-js": "^2.38.1",
     "@hugeicons/core-free-icons": "^4.0.0",
     "@hugeicons/react": "^1.1.5",
     "@splinetool/react-spline": "^4.1.0",
+    "@vercel/blob": "^2.3.1",
     "bloom-menu": "^0.1.0",
     "dotenv": "^17.3.1",
     "elevenlabs": "^1.59.0",
@@ -35,6 +38,7 @@
     "eslint-config-next": "^16.1.6",
     "sharp": "^0.34.5",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }

@@ -7,8 +7,8 @@ import { useEffect } from 'react';
  * Must match the first 2 items in WORK_ITEMS that have a video (payment-status, craft).
  */
 const MOBILE_PRELOAD_VIDEOS = [
-  '/videos/payment_processing.mp4',
-  '/videos/craft_video.mp4',
+  'https://xt6vyscb1zzon7fs.public.blob.vercel-storage.com/videos/payment_processing.mp4',
+  'https://xt6vyscb1zzon7fs.public.blob.vercel-storage.com/videos/craft_video.mp4',
 ];
 
 const PRELOAD_CLEANUP_MS = 4000; // After splash (~3.2s), remove preload elements

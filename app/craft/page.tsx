@@ -132,7 +132,7 @@ function NeuralPreviewCard({
         for (const e of entries) {
           if (e.isIntersecting) {
             if (!srcSetRef.current) {
-              video.src = '/videos/neural_video.mp4';
+              video.src = 'https://xt6vyscb1zzon7fs.public.blob.vercel-storage.com/videos/neural_video.mp4';
               srcSetRef.current = true;
             }
             video.play().catch(() => {});
