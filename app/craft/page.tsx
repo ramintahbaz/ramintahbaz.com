@@ -340,7 +340,7 @@ const MasonryCard = memo(function MasonryCard({
               io1?.disconnect();
             }
           },
-          { rootMargin: '200px', threshold: 0 }
+          { rootMargin: '800px', threshold: 0 }
         );
         io1.observe(card);
       }

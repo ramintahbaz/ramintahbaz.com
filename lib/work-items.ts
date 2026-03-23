@@ -26,6 +26,9 @@ export interface WorkItem {
 /** Bump `?v=` when replacing `public/videos/promise_website_demo.mp4` so cached responses invalidate. */
 export const PROMISE_WEBSITE_DEMO_VIDEO = '/videos/promise_website_demo.mp4?v=2';
 
+/** Craft masonry / grid card — lighter clip; hero on the work page uses `PROMISE_WEBSITE_DEMO_VIDEO`. */
+export const PROMISE_WEBSITE_MASONRY_VIDEO = '/videos/thumbnails/promise_website_demo_1.mp4';
+
 export const WORK_ITEMS: WorkItem[] = [
   {
     id: 'payment-status',
@@ -56,7 +59,7 @@ export const WORK_ITEMS: WorkItem[] = [
     category: 'product' as const,
     year: '2025',
     href: '/products/promise-website',
-    video: PROMISE_WEBSITE_DEMO_VIDEO,
+    video: PROMISE_WEBSITE_MASONRY_VIDEO,
     thumbnail: '/videos/thumbnails/promise_website_preview.mp4',
     excerpt: 'A coded redesign of Promise\'s marketing site. An unreleased direction.',
   },

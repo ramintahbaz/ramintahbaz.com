@@ -3,27 +3,34 @@
 import { PROMISE_WEBSITE_DEMO_VIDEO } from '@/lib/work-items';
 
 export function PromiseWebsiteHero() {
+  const raw = PROMISE_WEBSITE_DEMO_VIDEO;
+  const src = raw.includes('#') ? raw : `${raw}#t=0.01`;
+
   return (
     <div
       style={{
-        background: '#0c0c0f',
-        border: '1px solid #2E3033',
-        borderRadius: 12,
+        borderRadius: 10,
         overflow: 'hidden',
+        background: '#0a0a0a',
+        aspectRatio: '1',
+        position: 'relative',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
         fontFamily: 'var(--font-geist-sans), sans-serif',
       }}
     >
       <video
-        src={PROMISE_WEBSITE_DEMO_VIDEO}
+        src={src}
+        autoPlay
         muted
         loop
         playsInline
-        autoPlay
         preload="metadata"
-        controls
         style={{
+          position: 'absolute',
+          inset: 0,
           width: '100%',
-          height: 'auto',
+          height: '100%',
+          objectFit: 'contain',
           display: 'block',
         }}
       />
