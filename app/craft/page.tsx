@@ -312,7 +312,7 @@ const MasonryCard = memo(function MasonryCard({
     if (!video) return;
     if (!shouldPlayRef.current) return;
     if (!video.paused) return;
-    if (video.readyState < 2) return;
+    if (video.readyState < 1) return;
     void video.play().catch(() => {});
   }, []);
 
@@ -358,7 +358,7 @@ const MasonryCard = memo(function MasonryCard({
             }
           }
         },
-        { threshold: isMobile ? 0 : 0.2 }
+        { threshold: 0 }
       );
       io2.observe(card);
     });
@@ -377,7 +377,7 @@ const MasonryCard = memo(function MasonryCard({
         }
       }
     };
-  }, [hasVideo, gridIndex, eagerVideo, item.video, item.videoStart, isMobile, tryPlayIfAppropriate]);
+  }, [hasVideo, gridIndex, eagerVideo, item.video, item.videoStart, tryPlayIfAppropriate]);
 
   const year = item.year ?? '';
   const cardFrameAspect = item.cardAspectRatio ?? '4/3';
