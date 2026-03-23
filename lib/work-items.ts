@@ -23,10 +23,13 @@ export interface WorkItem {
   year?: string;
 }
 
+/** Bump `?v=` when replacing `public/videos/promise_website_demo.mp4` so cached responses invalidate. */
+export const PROMISE_WEBSITE_DEMO_VIDEO = '/videos/promise_website_demo.mp4?v=2';
+
 export const WORK_ITEMS: WorkItem[] = [
   {
     id: 'payment-status',
-    title: 'Payment Status',
+    title: 'Payment status',
     category: 'interaction',
     thumbnail: '',
     video: '/videos/payment_processing.mp4',
@@ -48,8 +51,18 @@ export const WORK_ITEMS: WorkItem[] = [
     year: 'July 2025',
   },
   {
+    id: 'promise-website',
+    title: 'Promise website',
+    category: 'product' as const,
+    year: '2025',
+    href: '/products/promise-website',
+    video: PROMISE_WEBSITE_DEMO_VIDEO,
+    thumbnail: '/videos/thumbnails/promise_website_preview.mp4',
+    excerpt: 'A coded redesign of Promise\'s marketing site. An unreleased direction.',
+  },
+  {
     id: 'photoboom',
-    title: 'PhotoBoom',
+    title: 'Photo boom',
     category: 'interaction',
     thumbnail: '',
     video: '/videos/photo_boom_video.mp4',
@@ -60,7 +73,7 @@ export const WORK_ITEMS: WorkItem[] = [
   },
   {
     id: 'electric-border',
-    title: 'Electric Border',
+    title: 'Electric border',
     category: 'interaction',
     thumbnail: '',
     video: '/videos/electric_border.mp4',
@@ -71,7 +84,7 @@ export const WORK_ITEMS: WorkItem[] = [
   },
   {
     id: 'visual-system-hover',
-    title: 'Visual System Hover',
+    title: 'Visual system hover',
     category: 'interaction',
     thumbnail: '',
     video: '/videos/visal_hover.mp4',
@@ -83,7 +96,7 @@ export const WORK_ITEMS: WorkItem[] = [
   },
   {
     id: 'film-02',
-    title: 'FedCaddy Commercial',
+    title: 'FedCaddy commercial',
     category: 'film',
     thumbnail: '/thumbnails/film-02.jpg',
     video: '/videos/fedcaddy_video_1%20(1).mp4',
@@ -107,7 +120,7 @@ export const WORK_ITEMS: WorkItem[] = [
   },
   {
     id: 'co-creator',
-    title: 'Co-Creator',
+    title: 'Co-creator',
     category: 'product',
     thumbnail: '/thumbnails/co-creator.jpg',
     video: '/videos/taste_demo.mp4',
@@ -118,7 +131,7 @@ export const WORK_ITEMS: WorkItem[] = [
   },
   {
     id: 'essay-01',
-    title: "We've Been Here Before",
+    title: "We've been here before",
     category: 'writing',
     thumbnail: '/thumbnails/essay-01.jpg',
     cardImage: '/images/essays/retro_vintage.png',
@@ -128,7 +141,7 @@ export const WORK_ITEMS: WorkItem[] = [
   },
   {
     id: 'carousel',
-    title: 'Netflix Film Scroll',
+    title: 'Netflix film scroll',
     category: 'interaction',
     thumbnail: '/thumbnails/carousel.jpg',
     video: '/videos/netflix_scroll.mp4',
@@ -138,7 +151,7 @@ export const WORK_ITEMS: WorkItem[] = [
   },
   {
     id: 'keycadets',
-    title: 'keycadets (acquired)',
+    title: 'Keycadets (acquired)',
     category: 'product',
     thumbnail: '/thumbnails/keycadets.png',
     video: '/images/keycadets/248285912_4711445322210021_8637902604872814185_n.MOV',
@@ -159,7 +172,7 @@ export const WORK_ITEMS: WorkItem[] = [
   },
   {
     id: 'sunset',
-    title: 'Sunset Chaser',
+    title: 'Sunset chaser',
     category: 'product',
     thumbnail: '/thumbnails/sunset.png',
     video: '/videos/sunset_chaser.mp4',
@@ -171,7 +184,7 @@ export const WORK_ITEMS: WorkItem[] = [
   },
   {
     id: 'thistrackiscrack',
-    title: 'ThisTrackisCrack (acquired)',
+    title: 'Thistrackiscrack (acquired)',
     category: 'product',
     thumbnail: '/thumbnails/thistrackiscrack.jpg',
     video: '/images/thistrackiscrack/trackiscrack.MOV',
@@ -181,7 +194,7 @@ export const WORK_ITEMS: WorkItem[] = [
   },
   {
     id: 'film-04',
-    title: 'Zeke Sanders: Slice of Pie',
+    title: 'Zeke Sanders: Slice of pie',
     category: 'film',
     thumbnail: '/thumbnails/film-04.jpg',
     video: '/videos/slice%20of%20pie.mp4',
@@ -194,7 +207,7 @@ export const WORK_ITEMS: WorkItem[] = [
   },
   {
     id: 'ai-document-verification',
-    title: 'Intelligent Document Review',
+    title: 'Intelligent document review',
     category: 'product',
     thumbnail: '/thumbnails/ai-document-verification.jpg',
     video: '/videos/document_review_preview.mp4',
@@ -207,7 +220,7 @@ export const WORK_ITEMS: WorkItem[] = [
   },
   {
     id: 'doritos-loaded',
-    title: 'Doritos Loaded',
+    title: 'Doritos loaded',
     category: 'product',
     thumbnail: '/thumbnails/doritos-loaded.jpg',
     video: '/images/doritos/231215_The-Garage_Doritos_S01_1x1_H264.mp4',
@@ -219,7 +232,7 @@ export const WORK_ITEMS: WorkItem[] = [
   },
   {
     id: 'essay-03',
-    title: "Tuesday Night Heartbreak",
+    title: 'Tuesday night heartbreak',
     category: 'writing',
     thumbnail: '',
     cardImage: '/images/essays/tuesday_night.png',
@@ -229,7 +242,7 @@ export const WORK_ITEMS: WorkItem[] = [
   },
   {
     id: 'film-03',
-    title: 'm8 Commercial',
+    title: 'M8 commercial',
     category: 'film',
     thumbnail: '/thumbnails/film-03.jpg',
     video: '/videos/m8_video_preview.mp4',
@@ -241,7 +254,7 @@ export const WORK_ITEMS: WorkItem[] = [
   },
   {
     id: 'essay-02',
-    title: "Amara's Law",
+    title: "Amara's law",
     category: 'writing',
     thumbnail: '',
     cardImage: "/images/essays/Amara's Law.png",
@@ -251,7 +264,7 @@ export const WORK_ITEMS: WorkItem[] = [
   },
   {
     id: 'film-05',
-    title: 'The Zeke Sanders Story',
+    title: 'The Zeke Sanders story',
     category: 'film',
     thumbnail: '/thumbnails/film-05.jpg',
     video: '/videos/zeke%20sanders.mp4',

@@ -47,6 +47,14 @@ const ThisTrackIsCrackEmbed = dynamic(() => import('@/components/thistrackiscrac
 const DoritosEmbed = dynamic(() => import('@/components/doritos-demos/DoritosEmbed'), { ssr: false });
 const OrderingFlowDemo = dynamic(() => import('@/components/doritos-demos/OrderingFlowDemo'), { ssr: false });
 const OrderingFlowImages = dynamic(() => import('@/components/doritos-demos/OrderingFlowImages'), { ssr: false });
+const PromiseWebsiteHero = dynamic(
+  () => import('@/components/work/PromiseWebsiteHero').then((m) => ({ default: m.PromiseWebsiteHero })),
+  { ssr: false }
+);
+const PromiseWebsiteDashboard = dynamic(
+  () => import('@/components/work/PromiseWebsiteDashboard').then((m) => ({ default: m.PromiseWebsiteDashboard })),
+  { ssr: false }
+);
 
 // Word timestamps JSON shape (from generate-audio.mjs)
 interface WordTimestampsJson {
@@ -874,6 +882,20 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
                           return (
                             <div key={i} style={{ margin: '16px 0 32px' }}>
                               <ReviewQueueDemo />
+                            </div>
+                          );
+                        }
+                        if (section.type === 'component' && section.componentId === 'promise-website-hero') {
+                          return (
+                            <div key={i} style={{ margin: '24px 0' }}>
+                              <PromiseWebsiteHero />
+                            </div>
+                          );
+                        }
+                        if (section.type === 'component' && section.componentId === 'promise-website-dashboard') {
+                          return (
+                            <div key={i} style={{ margin: '16px 0 32px' }}>
+                              <PromiseWebsiteDashboard />
                             </div>
                           );
                         }

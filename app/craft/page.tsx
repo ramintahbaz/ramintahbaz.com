@@ -15,23 +15,40 @@ const CRAFT_RAMIN_SKILL_INDEX = WORK_ITEMS.findIndex((w) => w.id === 'ramin-skil
 const CRAFT_FILM_TO_BOTTOM: number[] = [WORK_ITEMS.findIndex((w) => w.id === 'film-02'), WORK_ITEMS.findIndex((w) => w.id === 'film-04')].filter((i) => i >= 0);
 
 const CRAFT_DESKTOP_TAIL_INDICES = (() => {
-  const tail = Array.from({ length: WORK_ITEMS.length - 4 }, (_, i) => i + 3);
+  // Indices 0–3 are covered by the fixed desktop row (0, 2, 3, 1); tail starts at 4 to avoid duplicates.
+  const tail = Array.from({ length: WORK_ITEMS.length - 5 }, (_, i) => i + 4);
   const move = new Set(CRAFT_FILM_TO_BOTTOM);
   const arr = [...tail.filter((i) => !move.has(i)), ...CRAFT_FILM_TO_BOTTOM.slice().sort((a, b) => a - b)];
-  // Swap ai-document (15) ↔ m8 Commercial (18) in desktop masonry only; all other relative order unchanged.
-  const iDoc = arr.indexOf(15);
-  const iM8 = arr.indexOf(18);
+  // Swap ai-document (16) ↔ m8 Commercial (19) in desktop masonry only; all other relative order unchanged.
+  const iDoc = arr.indexOf(16);
+  const iM8 = arr.indexOf(19);
   if (iDoc >= 0 && iM8 >= 0) {
     [arr[iDoc], arr[iM8]] = [arr[iM8], arr[iDoc]];
   }
   return arr;
 })();
 
-const CRAFT_MOBILE_TAIL_BASE = [1, 3, 4, 11, 6, 7, 8, 9, 10, 5, 12, 13, 14, 16, 17, 18, 19, 20] as const;
+/** Index `2` (Promise website) is pinned early in the mobile slot list, not in the tail. */
+const CRAFT_MOBILE_TAIL_BASE = [1, 4, 5, 12, 7, 8, 9, 10, 11, 6, 13, 14, 15, 17, 18, 19, 20, 21] as const;
 const CRAFT_MOBILE_TAIL_INDICES = (() => {
   const move = new Set(CRAFT_FILM_TO_BOTTOM);
   return [...CRAFT_MOBILE_TAIL_BASE.filter((i) => !move.has(i)), ...CRAFT_FILM_TO_BOTTOM.slice().sort((a, b) => a - b)];
 })();
+
+const CRAFT_DESKTOP_PROMISE_IDX = WORK_ITEMS.findIndex((w) => w.id === 'promise-website');
+const CRAFT_DESKTOP_M8_IDX = WORK_ITEMS.findIndex((w) => w.id === 'film-03');
+
+/** Desktop only: exchange Promise website and m8 Commercial masonry positions. */
+function swapPromiseM8DesktopSlots<T extends { type: 'work'; index: number }>(slots: T[]): T[] {
+  const a = CRAFT_DESKTOP_PROMISE_IDX;
+  const b = CRAFT_DESKTOP_M8_IDX;
+  if (a < 0 || b < 0) return slots;
+  return slots.map((s) => {
+    if (s.index === a) return { ...s, index: b };
+    if (s.index === b) return { ...s, index: a };
+    return s;
+  });
+}
 
 const FILTER_OPTIONS: { value: FilterValue; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -711,24 +728,26 @@ export default function CraftPage() {
                 { type: 'work' as const, index: CRAFT_RAMIN_SKILL_INDEX },
                 { type: 'neural' as const },
                 { type: 'work' as const, index: 0 },
-                { type: 'work' as const, index: 15 },
                 { type: 'work' as const, index: 2 },
+                { type: 'work' as const, index: 16 },
+                { type: 'work' as const, index: 3 },
                 ...CRAFT_MOBILE_TAIL_INDICES.map((index) => ({
                   type: 'work' as const,
                   index,
                 })),
               ]
-            : [
+            : swapPromiseM8DesktopSlots([
                 { type: 'work' as const, index: CRAFT_RAMIN_SKILL_INDEX },
                 { type: 'neural' as const },
                 { type: 'work' as const, index: 0 },
                 { type: 'work' as const, index: 2 },
+                { type: 'work' as const, index: 3 },
                 { type: 'work' as const, index: 1 },
                 ...CRAFT_DESKTOP_TAIL_INDICES.map((index) => ({
                   type: 'work' as const,
                   index,
                 })),
-              ]
+              ])
           ).map((slot, gridIndex) =>
             slot.type === 'neural' ? (
               <NeuralPreviewCard

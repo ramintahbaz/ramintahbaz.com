@@ -45,6 +45,14 @@ const ThisTrackIsCrackEmbed = dynamic(() => import('@/components/thistrackiscrac
 const DoritosEmbed = dynamic(() => import('@/components/doritos-demos/DoritosEmbed'), { ssr: false });
 const OrderingFlowDemo = dynamic(() => import('@/components/doritos-demos/OrderingFlowDemo'), { ssr: false });
 const OrderingFlowImages = dynamic(() => import('@/components/doritos-demos/OrderingFlowImages'), { ssr: false });
+const PromiseWebsiteHero = dynamic(
+  () => import('@/components/work/PromiseWebsiteHero').then((m) => ({ default: m.PromiseWebsiteHero })),
+  { ssr: false }
+);
+const PromiseWebsiteDashboard = dynamic(
+  () => import('@/components/work/PromiseWebsiteDashboard').then((m) => ({ default: m.PromiseWebsiteDashboard })),
+  { ssr: false }
+);
 
 export type WorkPageSection = {
   type: 'text' | 'image' | 'code' | 'heading' | 'component' | 'video';
@@ -349,6 +357,8 @@ export function WorkPageSections({ sections }: WorkPageSectionsProps) {
           if (id === 'visual-system-hover-window') return (<div key={i} style={{ margin: '16px 0 32px', ...firstSectionNoTop }}><WindowDemo /></div>);
           if (id === 'ai-document-verification') return (<div key={i} style={{ margin: '24px 0', ...firstSectionNoTop }}><AIDocVerificationEmbed /></div>);
           if (id === 'ai-document-verification-review') return (<div key={i} style={{ margin: '16px 0 32px', ...firstSectionNoTop }}><ReviewQueueDemo /></div>);
+          if (id === 'promise-website-hero') return (<div key={i} style={{ margin: '24px 0', ...firstSectionNoTop }}><PromiseWebsiteHero /></div>);
+          if (id === 'promise-website-dashboard') return (<div key={i} style={{ margin: '16px 0 32px', ...firstSectionNoTop }}><PromiseWebsiteDashboard /></div>);
           if (id === 'co-creator') return (<div key={i} style={{ margin: '24px 0', ...firstSectionNoTop }}><CoCreatorEmbed /></div>);
           if (id === 'co-creator-fingerprint') return (<div key={i} style={{ margin: '16px 0 32px', ...firstSectionNoTop }}><FingerprintDemo /></div>);
           if (id === 'sunset') return (<div key={i} style={{ margin: '24px 0', ...firstSectionNoTop }}><SunsetEmbed /></div>);

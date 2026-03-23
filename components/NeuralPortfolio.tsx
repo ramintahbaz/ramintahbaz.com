@@ -221,6 +221,17 @@ const AI_DOC_VERIFICATION_SECTIONS = [
   { type: 'text' as const, content: `React 18, Node.js/Express, Google Cloud Document AI. The review queue and resident upload flow are separate surfaces.` },
 ];
 
+const PROMISE_WEBSITE_SECTIONS = [
+  { type: 'component' as const, componentId: 'promise-website-hero' },
+  { type: 'heading' as const, content: 'The concept' },
+  { type: 'text' as const, content: `Govtech sites often explain the stack in copy first. Here, the hero embeds a live dashboard that steps through what Promise actually runs: payment plans, benefits, eligibility, financial relief — so visitors can demo the actual product and understand our attention to craft.` },
+  { type: 'heading' as const, content: 'The dashboard' },
+  { type: 'text' as const, content: `Fully interactive React: batch tables, KPIs, program-level disbursement, recipient rows, and a compliance audit log — instead of the traditional recording or static frame. The mock data mirrors how Promise structures payments and oversight at scale.` },
+  { type: 'component' as const, componentId: 'promise-website-dashboard' },
+  { type: 'heading' as const, content: 'Stack' },
+  { type: 'text' as const, content: `Next.js, Framer Motion, Tailwind, TypeScript. The dashboard is a self-contained tree embedded in the page.` },
+];
+
 const VISUAL_SYSTEM_HOVER_SECTIONS = [
   { type: 'component' as const, componentId: 'visual-system-hover' },
   { type: 'text' as const, content: `Four people who influenced me through different stages of my life: Jordan, Jobs, Robin Williams, Mr. Rogers. Hover a card and a video preview appears beside it. Click and it opens in a draggable, resizable window. On mobile, tap to watch.` },
@@ -557,6 +568,21 @@ export const PROJECT_DETAILS: Record<string, NonNullable<ProjectModalProject>> =
           thumbnail: '/thumbnails/ai-document-verification.jpg',
           tags: [],
           content: { sections: AI_DOC_VERIFICATION_SECTIONS },
+        },
+      ];
+    }
+    if (item.id === 'promise-website') {
+      return [
+        item.id,
+        {
+          id: item.id,
+          title: item.title,
+          category: item.category,
+          description: 'A coded redesign of Promise\'s marketing site. An unreleased direction.',
+          year: item.year ?? '2025',
+          thumbnail: '/videos/thumbnails/promise_website_preview.mp4',
+          tags: [],
+          content: { sections: PROMISE_WEBSITE_SECTIONS },
         },
       ];
     }
@@ -2885,19 +2911,19 @@ const SHOWREEL_VIDEO = '/videos/document_review_preview.mp4';
 const SHOWREEL_ANCHOR_ID = 'visual-system-hover'; // desktop: showreel placed to the right of this card
 
 const SHOWREEL_ITEMS = [
-  { id: 'photoboom', title: 'PhotoBoom', video: '/videos/photo_boom_video.mp4', href: '/photoboom' },
-  { id: 'ai-document-verification', title: 'Intelligent Document Review', video: '/videos/document_review_preview.mp4', href: '/products/ai-document-verification' },
-  { id: 'co-creator', title: 'Co-Creator', video: '/images/co-creator/taste%20%E2%86%92%20system%20demo.mp4', href: '/products/co-creator' },
-  { id: 'keycadets', title: 'keycadets (acquired)', video: '/images/keycadets/248285912_4711445322210021_8637902604872814185_n.MOV', href: '/products/keycadets' },
-  { id: 'carousel', title: 'Netflix Film Scroll', video: '/videos/netflix_scroll.mp4', href: '/interactions/carousel' },
-  { id: 'electric-border', title: 'Electric Border', video: '/videos/electric_border.mp4', href: '/interactions/electric-border' },
+  { id: 'photoboom', title: 'Photo boom', video: '/videos/photo_boom_video.mp4', href: '/photoboom' },
+  { id: 'ai-document-verification', title: 'Intelligent document review', video: '/videos/document_review_preview.mp4', href: '/products/ai-document-verification' },
+  { id: 'co-creator', title: 'Co-creator', video: '/images/co-creator/taste%20%E2%86%92%20system%20demo.mp4', href: '/products/co-creator' },
+  { id: 'keycadets', title: 'Keycadets (acquired)', video: '/images/keycadets/248285912_4711445322210021_8637902604872814185_n.MOV', href: '/products/keycadets' },
+  { id: 'carousel', title: 'Netflix film scroll', video: '/videos/netflix_scroll.mp4', href: '/interactions/carousel' },
+  { id: 'electric-border', title: 'Electric border', video: '/videos/electric_border.mp4', href: '/interactions/electric-border' },
   { id: 'bloom', title: 'Bloom', video: '/videos/bloom_video.mp4', href: '/interactions/bloom' },
-  { id: 'payment-status', title: 'Payment Status', video: '/videos/payment_processing.mp4', href: '/payment-status' },
-  { id: 'visual-system-hover', title: 'Visual System Hover', video: '/videos/visal_hover.mp4', href: '/visual-system-hover' },
+  { id: 'payment-status', title: 'Payment status', video: '/videos/payment_processing.mp4', href: '/payment-status' },
+  { id: 'visual-system-hover', title: 'Visual system hover', video: '/videos/visal_hover.mp4', href: '/visual-system-hover' },
   { id: 'craft', title: 'Craft', video: '/videos/craft_video.mp4', href: '/products/craft' },
-  { id: 'sunset', title: 'Sunset Chaser', video: '/videos/sunset_chaser.mp4', href: '/products/sunset' },
-  { id: 'thistrackiscrack', title: 'ThisTrackisCrack (acquired)', video: '/images/thistrackiscrack/trackiscrack.MOV', href: '/products/thistrackiscrack' },
-  { id: 'doritos-loaded', title: 'Doritos Loaded', video: '/images/doritos/231215_The-Garage_Doritos_S01_1x1_H264.mp4', href: '/products/doritos-loaded' },
+  { id: 'sunset', title: 'Sunset chaser', video: '/videos/sunset_chaser.mp4', href: '/products/sunset' },
+  { id: 'thistrackiscrack', title: 'Thistrackiscrack (acquired)', video: '/images/thistrackiscrack/trackiscrack.MOV', href: '/products/thistrackiscrack' },
+  { id: 'doritos-loaded', title: 'Doritos loaded', video: '/images/doritos/231215_The-Garage_Doritos_S01_1x1_H264.mp4', href: '/products/doritos-loaded' },
 ];
 // Row height fixed to short card size so the 1:1 showreel never drives row size; showreel fits within 2 rows.
 const GRID_ROW_HEIGHT_DESKTOP = 98;
