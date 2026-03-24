@@ -23,8 +23,13 @@ export interface WorkItem {
   year?: string;
 }
 
-/** Bump `?v=` when replacing `https://xt6vyscb1zzon7fs.public.blob.vercel-storage.com/videos/promise_website_demo.mp4` so cached responses invalidate. */
-export const PROMISE_WEBSITE_DEMO_VIDEO = 'https://xt6vyscb1zzon7fs.public.blob.vercel-storage.com/videos/promise_website_demo.mp4';
+/** Masonry + neural hover preview for Promise Console. */
+export const PROMISE_COMMERCIAL_PREVIEW_VIDEO =
+  'https://xt6vyscb1zzon7fs.public.blob.vercel-storage.com/videos/Promise_Console_preview.mp4';
+
+/** Full-length Promise Console clip (e.g. work page hero). Bump URL or add `?v=` when replacing the file so cached responses invalidate. */
+export const PROMISE_WEBSITE_DEMO_VIDEO =
+  'https://xt6vyscb1zzon7fs.public.blob.vercel-storage.com/videos/promise_console_latest.mp4';
 
 /** Craft masonry / grid card — lighter clip; hero on the work page uses `PROMISE_WEBSITE_DEMO_VIDEO`. */
 export const PROMISE_WEBSITE_MASONRY_VIDEO = 'https://xt6vyscb1zzon7fs.public.blob.vercel-storage.com/videos/thumbnails/promise_website_demo_1.mp4';
@@ -57,7 +62,7 @@ export const WORK_ITEMS: WorkItem[] = [
     id: 'promise-website',
     title: 'Promise website',
     category: 'product' as const,
-    year: '2025',
+    year: 'December 2026',
     href: '/products/promise-website',
     video: PROMISE_WEBSITE_MASONRY_VIDEO,
     thumbnail: 'https://xt6vyscb1zzon7fs.public.blob.vercel-storage.com/videos/thumbnails/promise_website_preview.mp4',
@@ -291,5 +296,16 @@ export const WORK_ITEMS: WorkItem[] = [
     excerpt:
       'A CLI skill for design and engineering review—animation, forms, mobile, and hierarchy in one pass.',
     year: 'March 2026',
+  },
+  {
+    id: 'promise-console',
+    title: 'Promise Console',
+    category: 'product' as const,
+    href: '/products/promise-console',
+    excerpt: 'An agentic ops console for government benefit payment infrastructure.',
+    year: '2025',
+    video: PROMISE_COMMERCIAL_PREVIEW_VIDEO,
+    thumbnail: 'https://xt6vyscb1zzon7fs.public.blob.vercel-storage.com/videos/promise_website_demo.mp4',
+    cardAspectRatio: '4/3',
   },
 ];

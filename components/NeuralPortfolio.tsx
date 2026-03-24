@@ -9,7 +9,7 @@ import { useSplash } from '@/contexts/SplashContext';
 import type { ProjectModalProject } from '@/components/ProjectModal';
 import { BentoCard } from '@/components/BentoCard';
 import SignalIcon from '@/components/SignalIcon';
-import { WORK_ITEMS, type WorkItem } from '@/lib/work-items';
+import { WORK_ITEMS, PROMISE_WEBSITE_DEMO_VIDEO, PROMISE_COMMERCIAL_PREVIEW_VIDEO, type WorkItem } from '@/lib/work-items';
 
 export { WORK_ITEMS, type WorkItem };
 
@@ -583,7 +583,7 @@ export const PROJECT_DETAILS: Record<string, NonNullable<ProjectModalProject>> =
           title: item.title,
           category: item.category,
           description: 'A coded redesign of Promise\'s marketing site. An unreleased direction.',
-          year: item.year ?? '2025',
+          year: item.year ?? 'December 2026',
           thumbnail: 'https://xt6vyscb1zzon7fs.public.blob.vercel-storage.com/videos/thumbnails/promise_website_preview.mp4',
           tags: [],
           content: { sections: PROMISE_WEBSITE_SECTIONS },
@@ -747,6 +747,66 @@ export const PROJECT_DETAILS: Record<string, NonNullable<ProjectModalProject>> =
           ],
         },
       }];
+    }
+    if (item.id === 'promise-console') {
+      return [
+        item.id,
+        {
+          id: item.id,
+          title: item.title,
+          category: item.category,
+          description: 'Agentic ops console for government benefit payment infrastructure.',
+          year: item.year ?? '2025',
+          thumbnail: PROMISE_COMMERCIAL_PREVIEW_VIDEO,
+          tags: ['Product design', 'Design engineering', 'Fintech', 'AI'],
+          link: item.href,
+          content: {
+            sections: [
+              { type: 'video', content: PROMISE_WEBSITE_DEMO_VIDEO },
+              {
+                type: 'text',
+                content: `Promise is payment infrastructure for government benefit programs. Console is the operator interface — accounts, payment plans, ACH, ledger, compliance, all in one surface.`,
+              },
+              {
+                type: 'heading',
+                content: 'Agent as infrastructure',
+              },
+              {
+                type: 'text',
+                content: `Chat-first agent UIs break at the first audit request. Console keeps the account record as the source of truth. The agent executes against it. The thread is just input.`,
+              },
+              {
+                type: 'heading',
+                content: 'What one instruction triggers',
+              },
+              {
+                type: 'code',
+                content: `// "Set up a 6-month plan for TX-8847 and post the first installment"\n\nGET  /v1/accounts/TX-8847                       200   41ms\nGET  /v1/accounts/TX-8847/balance               200   28ms\n\nPOST /v1/payment_plans                          201  112ms\n     { account_id: "TX-8847", amount: 184200,\n       installments: 6, interval: "monthly",\n       start_date: "2026-04-01" }\n\nPOST /v1/payment_plans/pp_8847_01/installments  201   88ms\nPOST /v1/ach/initiate                           202   67ms\n\nPOST /v1/ledger/entries                         201   45ms\nPOST /v1/compliance/screen                      200   96ms\n\nWH   payment_plan.created                       201   94ms\nWH   installment.posted                         201   71ms\nWH   ach.initiated                              201   58ms`,
+              },
+              {
+                type: 'text',
+                content: `13 operations. Under 400ms. Every state change written back to the account.`,
+              },
+              {
+                type: 'heading',
+                content: 'Observability',
+              },
+              {
+                type: 'text',
+                content: `Session logs are partitioned by domain: payments, ACH, ledger, webhooks, compliance, notifications. Each section maps to a different reader. No separate audit view.`,
+              },
+              {
+                type: 'heading',
+                content: 'The failure mode',
+              },
+              {
+                type: 'text',
+                content: `In government fintech, a failed payment can interrupt a benefit or trigger a collections action. Operators need to trust the system and verify it. Console makes both possible at the same time.`,
+              },
+            ],
+          },
+        },
+      ];
     }
     return [
       item.id,

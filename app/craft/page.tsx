@@ -11,6 +11,16 @@ type FilterValue = 'all' | WorkItem['category'];
 /** Last in WORK_ITEMS; craft renders this card first without renumbering other indices */
 const CRAFT_RAMIN_SKILL_INDEX = WORK_ITEMS.findIndex((w) => w.id === 'ramin-skill');
 
+/** Featured early in masonry; excluded from tail so it doesn’t render twice */
+const CRAFT_PROMISE_CONSOLE_INDEX = WORK_ITEMS.findIndex((w) => w.id === 'promise-console');
+
+/** Indices pinned in the first row (after neural); must not appear again in tail (avoids duplicate keys + duplicate cards). */
+function filterTailExcludedFromFeatured(i: number): boolean {
+  if (CRAFT_PROMISE_CONSOLE_INDEX >= 0 && i === CRAFT_PROMISE_CONSOLE_INDEX) return false;
+  if (CRAFT_RAMIN_SKILL_INDEX >= 0 && i === CRAFT_RAMIN_SKILL_INDEX) return false;
+  return true;
+}
+
 /** FedCaddy + Slice of Pie: same relative order as the rest, but rendered last in the masonry tails */
 const CRAFT_FILM_TO_BOTTOM: number[] = [WORK_ITEMS.findIndex((w) => w.id === 'film-02'), WORK_ITEMS.findIndex((w) => w.id === 'film-04')].filter((i) => i >= 0);
 
@@ -25,14 +35,19 @@ const CRAFT_DESKTOP_TAIL_INDICES = (() => {
   if (iDoc >= 0 && iM8 >= 0) {
     [arr[iDoc], arr[iM8]] = [arr[iM8], arr[iDoc]];
   }
-  return arr;
+  return arr.filter(filterTailExcludedFromFeatured);
 })();
 
 /** Index `2` (Promise website) is pinned early in the mobile slot list, not in the tail. */
 const CRAFT_MOBILE_TAIL_BASE = [1, 4, 5, 12, 7, 8, 9, 10, 11, 6, 13, 14, 15, 17, 18, 19, 20, 21] as const;
 const CRAFT_MOBILE_TAIL_INDICES = (() => {
   const move = new Set(CRAFT_FILM_TO_BOTTOM);
-  return [...CRAFT_MOBILE_TAIL_BASE.filter((i) => !move.has(i)), ...CRAFT_FILM_TO_BOTTOM.slice().sort((a, b) => a - b)];
+  return [
+    ...CRAFT_MOBILE_TAIL_BASE.filter(
+      (i) => !move.has(i) && filterTailExcludedFromFeatured(i)
+    ),
+    ...CRAFT_FILM_TO_BOTTOM.slice().sort((a, b) => a - b),
+  ];
 })();
 
 const CRAFT_DESKTOP_PROMISE_IDX = WORK_ITEMS.findIndex((w) => w.id === 'promise-website');
@@ -750,6 +765,9 @@ export default function CraftPage() {
             ? [
                 { type: 'work' as const, index: CRAFT_RAMIN_SKILL_INDEX },
                 { type: 'neural' as const },
+                ...(CRAFT_PROMISE_CONSOLE_INDEX >= 0
+                  ? [{ type: 'work' as const, index: CRAFT_PROMISE_CONSOLE_INDEX }]
+                  : []),
                 { type: 'work' as const, index: 0 },
                 { type: 'work' as const, index: 2 },
                 { type: 'work' as const, index: 16 },
@@ -762,6 +780,9 @@ export default function CraftPage() {
             : swapPromiseM8DesktopSlots([
                 { type: 'work' as const, index: CRAFT_RAMIN_SKILL_INDEX },
                 { type: 'neural' as const },
+                ...(CRAFT_PROMISE_CONSOLE_INDEX >= 0
+                  ? [{ type: 'work' as const, index: CRAFT_PROMISE_CONSOLE_INDEX }]
+                  : []),
                 { type: 'work' as const, index: 0 },
                 { type: 'work' as const, index: 2 },
                 { type: 'work' as const, index: 3 },
@@ -782,7 +803,7 @@ export default function CraftPage() {
               />
             ) : WORK_ITEMS[slot.index] ? (
               <MasonryCard
-                key={WORK_ITEMS[slot.index].id}
+                key={`craft-${gridIndex}-${WORK_ITEMS[slot.index].id}`}
                 item={WORK_ITEMS[slot.index]}
                 onNavigate={() => handleCardClick(WORK_ITEMS[slot.index]!)}
                 dimmed={filter !== 'all' && WORK_ITEMS[slot.index].category !== filter}

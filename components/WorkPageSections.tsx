@@ -53,6 +53,8 @@ const PromiseWebsiteDashboard = dynamic(
   () => import('@/components/work/PromiseWebsiteDashboard').then((m) => ({ default: m.PromiseWebsiteDashboard })),
   { ssr: false }
 );
+const PromiseConsoleDashboard = dynamic(() => import('@/components/demos/PromiseConsoleDashboard'), { ssr: false });
+const PromiseConsoleActivity = dynamic(() => import('@/components/demos/PromiseConsoleActivity'), { ssr: false });
 
 export type WorkPageSection = {
   type: 'text' | 'image' | 'code' | 'heading' | 'component' | 'video';
@@ -361,6 +363,8 @@ export function WorkPageSections({ sections }: WorkPageSectionsProps) {
           if (id === 'ai-document-verification-review') return (<div key={i} style={{ margin: '16px 0 32px', ...firstSectionNoTop }}><ReviewQueueDemo /></div>);
           if (id === 'promise-website-hero') return (<div key={i} style={{ margin: '24px 0', ...firstSectionNoTop }}><PromiseWebsiteHero /></div>);
           if (id === 'promise-website-dashboard') return (<div key={i} style={{ margin: '16px 0 32px', ...firstSectionNoTop }}><PromiseWebsiteDashboard /></div>);
+          if (id === 'promise-console-dashboard') return (<div key={i} style={{ margin: '24px 0', ...firstSectionNoTop }}><PromiseConsoleDashboard /></div>);
+          if (id === 'promise-console-activity') return (<div key={i} style={{ margin: '16px 0 32px', ...firstSectionNoTop }}><PromiseConsoleActivity /></div>);
           if (id === 'co-creator') return (<div key={i} style={{ margin: '24px 0', ...firstSectionNoTop }}><CoCreatorEmbed /></div>);
           if (id === 'co-creator-fingerprint') return (<div key={i} style={{ margin: '16px 0 32px', ...firstSectionNoTop }}><FingerprintDemo /></div>);
           if (id === 'sunset') return (<div key={i} style={{ margin: '24px 0', ...firstSectionNoTop }}><SunsetEmbed /></div>);
