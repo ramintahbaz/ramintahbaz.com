@@ -763,10 +763,12 @@ export default function CraftPage() {
         >
           {(isMobile
             ? [
-                { type: 'work' as const, index: CRAFT_RAMIN_SKILL_INDEX },
-                { type: 'neural' as const },
                 ...(CRAFT_PROMISE_CONSOLE_INDEX >= 0
                   ? [{ type: 'work' as const, index: CRAFT_PROMISE_CONSOLE_INDEX }]
+                  : []),
+                { type: 'neural' as const },
+                ...(CRAFT_RAMIN_SKILL_INDEX >= 0
+                  ? [{ type: 'work' as const, index: CRAFT_RAMIN_SKILL_INDEX }]
                   : []),
                 { type: 'work' as const, index: 0 },
                 { type: 'work' as const, index: 2 },
@@ -778,10 +780,12 @@ export default function CraftPage() {
                 })),
               ]
             : swapPromiseM8DesktopSlots([
-                { type: 'work' as const, index: CRAFT_RAMIN_SKILL_INDEX },
-                { type: 'neural' as const },
                 ...(CRAFT_PROMISE_CONSOLE_INDEX >= 0
                   ? [{ type: 'work' as const, index: CRAFT_PROMISE_CONSOLE_INDEX }]
+                  : []),
+                { type: 'neural' as const },
+                ...(CRAFT_RAMIN_SKILL_INDEX >= 0
+                  ? [{ type: 'work' as const, index: CRAFT_RAMIN_SKILL_INDEX }]
                   : []),
                 { type: 'work' as const, index: 0 },
                 { type: 'work' as const, index: 2 },

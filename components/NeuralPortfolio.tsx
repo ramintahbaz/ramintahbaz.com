@@ -583,7 +583,7 @@ export const PROJECT_DETAILS: Record<string, NonNullable<ProjectModalProject>> =
           title: item.title,
           category: item.category,
           description: 'A coded redesign of Promise\'s marketing site. An unreleased direction.',
-          year: item.year ?? 'December 2026',
+          year: item.year ?? 'December 2025',
           thumbnail: 'https://xt6vyscb1zzon7fs.public.blob.vercel-storage.com/videos/thumbnails/promise_website_preview.mp4',
           tags: [],
           content: { sections: PROMISE_WEBSITE_SECTIONS },
