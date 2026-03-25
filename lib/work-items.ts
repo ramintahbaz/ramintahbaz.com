@@ -25,7 +25,7 @@ export interface WorkItem {
 
 /** Masonry + neural hover preview for Promise Console. */
 export const PROMISE_COMMERCIAL_PREVIEW_VIDEO =
-  'https://cdn.ramintahbaz.com/videos/Promise_Console_preview.mp4#t=0.01';
+  'https://cdn.ramintahbaz.com/videos/promise-console_preview_new.mp4#t=0.01';
 
 /** Promise marketing-site hero (`PromiseWebsiteHero` / promise-website work page). Bump URL or add `?v=` when replacing the file so cached responses invalidate. */
 export const PROMISE_WEBSITE_DEMO_VIDEO =
