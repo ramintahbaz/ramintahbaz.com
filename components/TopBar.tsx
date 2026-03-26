@@ -253,7 +253,7 @@ export default function TopBar() {
           >
             Resume
           </Link>
-          <Link href="https://github.com/ramintahbaz23/" target="_blank" rel="noopener noreferrer" className="shrink-0 flex items-center hover:opacity-80" aria-label="GitHub">
+          <Link href="https://github.com/ramintahbaz" target="_blank" rel="noopener noreferrer" className="shrink-0 flex items-center hover:opacity-80" aria-label="GitHub">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/GitHub_Invertocat_White.svg" alt="" className="h-3.5 w-3.5" />
           </Link>
@@ -346,7 +346,7 @@ export default function TopBar() {
         >
           Resume
         </Link>
-        <Link href="https://github.com/ramintahbaz23/" target="_blank" rel="noopener noreferrer" className="shrink-0 flex items-center hover:opacity-80" aria-label="GitHub">
+        <Link href="https://github.com/ramintahbaz" target="_blank" rel="noopener noreferrer" className="shrink-0 flex items-center hover:opacity-80" aria-label="GitHub">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/GitHub_Invertocat_White.svg" alt="" className="h-3.5 w-3.5" />
         </Link>
