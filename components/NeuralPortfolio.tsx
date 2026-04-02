@@ -3081,7 +3081,7 @@ function WorkCard({ item, x, y, visible, onNavigate }: {
                 width: '100%',
                 height: '100%',
                 objectFit: 'cover',
-                objectPosition: 'center',
+                objectPosition: item.videoObjectPosition ?? 'center',
                 transform: item.videoScale != null ? `scale(${item.videoScale})` : undefined,
                 transformOrigin: 'center',
               }}
@@ -3126,20 +3126,20 @@ const MOBILE_PREVIEW_CATEGORY_LABELS: Record<string, string> = {
 const MOBILE_PREVIEW_MODAL_WIDTH = 'min(88vw, 320px)';
 const MOBILE_PREVIEW_CARD_HEIGHT = 300;
 
-const SHOWREEL_VIDEO = 'https://cdn.ramintahbaz.com/videos/document_review_preview.mp4#t=0.01';
+const SHOWREEL_VIDEO = 'https://cdn.ramintahbaz.com/videos/preview_intelligent_document_review.mp4#t=0.01';
 const SHOWREEL_ANCHOR_ID = 'visual-system-hover'; // desktop: showreel placed to the right of this card
 
 const SHOWREEL_ITEMS = [
   { id: 'photoboom', title: 'Photo boom', video: 'https://cdn.ramintahbaz.com/videos/photo_boom_video.mp4#t=0.01', href: '/photoboom' },
-  { id: 'ai-document-verification', title: 'Intelligent document review', video: 'https://cdn.ramintahbaz.com/videos/document_review_preview.mp4#t=0.01', href: '/products/ai-document-verification' },
+  { id: 'ai-document-verification', title: 'Intelligent document review', video: 'https://cdn.ramintahbaz.com/videos/preview_intelligent_document_review.mp4#t=0.01', href: '/products/ai-document-verification' },
   { id: 'co-creator', title: 'Co-creator', video: '/images/co-creator/taste%20%E2%86%92%20system%20demo.mp4', href: '/products/co-creator' },
   { id: 'keycadets', title: 'Keycadets (acquired)', video: '/images/keycadets/248285912_4711445322210021_8637902604872814185_n.MOV', href: '/products/keycadets' },
   { id: 'carousel', title: 'Netflix film scroll', video: 'https://cdn.ramintahbaz.com/videos/netflix_scroll.mp4#t=0.01', href: '/interactions/carousel' },
   { id: 'electric-border', title: 'Electric border', video: 'https://cdn.ramintahbaz.com/videos/electric_border.mp4#t=0.01', href: '/interactions/electric-border' },
-  { id: 'bloom', title: 'Bloom', video: 'https://cdn.ramintahbaz.com/videos/bloom_video.mp4#t=0.01', href: '/interactions/bloom' },
+  { id: 'bloom', title: 'Bloom', video: 'https://cdn.ramintahbaz.com/videos/preview_bloom.mp4#t=0.01', href: '/interactions/bloom' },
   { id: 'payment-status', title: 'Payment status', video: 'https://cdn.ramintahbaz.com/videos/payment_processing.mp4#t=0.01', href: '/payment-status' },
   { id: 'visual-system-hover', title: 'Visual system hover', video: 'https://cdn.ramintahbaz.com/videos/visal_hover.mp4#t=0.01', href: '/visual-system-hover' },
-  { id: 'craft', title: 'Craft', video: 'https://cdn.ramintahbaz.com/videos/craft_video.mp4#t=0.01', href: '/products/craft' },
+  { id: 'craft', title: 'Craft', video: 'https://cdn.ramintahbaz.com/videos/preview_craft.mp4#t=0.01', href: '/products/craft' },
   { id: 'sunset', title: 'Sunset chaser', video: 'https://cdn.ramintahbaz.com/videos/sunset_chaser.mp4#t=0.01', href: '/products/sunset' },
   { id: 'thistrackiscrack', title: 'Thistrackiscrack (acquired)', video: '/images/thistrackiscrack/trackiscrack.MOV', href: '/products/thistrackiscrack' },
   { id: 'doritos-loaded', title: 'Doritos loaded', video: '/images/doritos/231215_The-Garage_Doritos_S01_1x1_H264.mp4', href: '/products/doritos-loaded' },
@@ -3194,6 +3194,7 @@ function MobilePreviewCard({ item, visible, onNavigate, onDismiss }: {
   const loopEndSec = videoStartSec + (item.videoLoopSec ?? 4);
 
   const mobileObjectFit = item.videoObjectFit ?? 'cover';
+  const mobileObjectPosition = item.videoObjectPosition ?? 'center';
   const mobileVideoScale = item.videoScale ?? undefined;
 
   useEffect(() => {
@@ -3297,6 +3298,7 @@ function MobilePreviewCard({ item, visible, onNavigate, onDismiss }: {
                       position: 'absolute', inset: 0,
                       width: '100%', height: '100%',
                       objectFit: mobileObjectFit,
+                      objectPosition: mobileObjectPosition,
                       transform: mobileVideoScale ? `scale(${mobileVideoScale})` : undefined,
                     }}
                   />

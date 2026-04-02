@@ -8,7 +8,7 @@ import { useEffect } from 'react';
  */
 const MOBILE_PRELOAD_VIDEOS = [
   'https://cdn.ramintahbaz.com/videos/payment_processing.mp4#t=0.01',
-  'https://cdn.ramintahbaz.com/videos/craft_video.mp4#t=0.01',
+  'https://cdn.ramintahbaz.com/videos/preview_craft.mp4#t=0.01',
 ];
 
 const PRELOAD_CLEANUP_MS = 4000; // After splash (~3.2s), remove preload elements

@@ -15,6 +15,8 @@ export interface WorkItem {
   videoLoopSec?: number;
   videoFullLoop?: boolean;
   videoObjectFit?: 'cover' | 'contain';
+  /** CSS `object-position` for video in card/hover previews (e.g. `center top`). */
+  videoObjectPosition?: string;
   videoScale?: number;
   /** Card frame aspect ratio in masonry; defaults to 4/3 when omitted */
   cardAspectRatio?: CardAspectRatio;
@@ -61,7 +63,7 @@ export const WORK_ITEMS: WorkItem[] = [
     title: 'Craft',
     category: 'product',
     thumbnail: '/thumbnails/craft.png',
-    video: 'https://cdn.ramintahbaz.com/videos/craft_video.mp4#t=0.01',
+    video: 'https://cdn.ramintahbaz.com/videos/preview_craft.mp4#t=0.01',
     videoFullLoop: true,
     cardAspectRatio: '4/3',
     href: '/products/craft',
@@ -76,6 +78,7 @@ export const WORK_ITEMS: WorkItem[] = [
     href: '/products/promise-website',
     video: PROMISE_WEBSITE_MASONRY_VIDEO,
     thumbnail: 'https://cdn.ramintahbaz.com/videos/thumbnails/promise_website_preview.mp4#t=0.01',
+    videoObjectPosition: 'center top',
     excerpt: 'A coded redesign of Promise\'s marketing site. An unreleased direction.',
   },
   {
@@ -85,6 +88,7 @@ export const WORK_ITEMS: WorkItem[] = [
     thumbnail: '',
     video: 'https://cdn.ramintahbaz.com/videos/photo_boom_video.mp4#t=0.01',
     cardAspectRatio: '3/4',
+    videoObjectPosition: 'center top',
     href: '/photoboom',
     excerpt: 'A photo stack that explodes from wherever you click.',
     year: 'January 2026',
@@ -129,7 +133,7 @@ export const WORK_ITEMS: WorkItem[] = [
     title: 'Bloom',
     category: 'interaction',
     thumbnail: '',
-    video: 'https://cdn.ramintahbaz.com/videos/bloom_video.mp4#t=0.01',
+    video: 'https://cdn.ramintahbaz.com/videos/preview_bloom.mp4#t=0.01',
     videoFullLoop: true,
     cardAspectRatio: '16/9',
     href: '/interactions/bloom',
@@ -228,7 +232,7 @@ export const WORK_ITEMS: WorkItem[] = [
     title: 'Intelligent document review',
     category: 'product',
     thumbnail: '/thumbnails/ai-document-verification.jpg',
-    video: 'https://cdn.ramintahbaz.com/videos/document_review_preview.mp4#t=0.01',
+    video: 'https://cdn.ramintahbaz.com/videos/preview_intelligent_document_review.mp4#t=0.01',
     videoObjectFit: 'cover',
     videoFullLoop: true,
     cardAspectRatio: '3/4',

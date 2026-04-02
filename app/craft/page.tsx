@@ -556,6 +556,9 @@ const MasonryCard = memo(function MasonryCard({
               height: '100%',
               display: 'block',
               objectFit: videoFit,
+              ...(item.videoObjectPosition != null
+                ? { objectPosition: item.videoObjectPosition }
+                : {}),
               opacity: 0,
               transition: 'opacity 0.4s ease',
               ...(item.videoScale != null
