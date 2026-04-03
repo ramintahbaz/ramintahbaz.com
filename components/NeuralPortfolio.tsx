@@ -15,6 +15,9 @@ import {
   PROMISE_CONSOLE_WORK_PAGE_VIDEO,
   NACHA_PREVIEW_VIDEO,
   NACHA_DEMO_VIDEO,
+  PHOTOBOOM_PREVIEW_VIDEO,
+  OPERATOR_PREVIEW_VIDEO,
+  OPERATOR_WORK_PAGE_VIDEO,
   type WorkItem,
 } from '@/lib/work-items';
 
@@ -118,9 +121,9 @@ const THISTRACKISCRACK_SECTIONS = [
   { type: 'heading' as const, content: 'The artists' },
   { type: 'text' as const, content: `Krewella, Skrillex, Diplo, Kid Cudi, Wiz Khalifa all showed up on the site early. I wasn't connected — I was just listening to a lot of music and writing about what I found.` },
   { type: 'heading' as const, content: 'The build' },
-  { type: 'text' as const, content: `PHP and MySQL. Flash audio players because that's what existed in 2008. HTML and CSS designed in Photoshop. None of it was taught. All of it was figured out along the way.` },
+  { type: 'text' as const, content: `PHP and MySQL. Flash audio players because that's what existed in 2008. HTML and CSS designed in Photoshop.` },
   { type: 'heading' as const, content: 'The acquisition' },
-  { type: 'text' as const, content: `It was eventually acquired. I was still in high school. It's here because it's where the building started.` },
+  { type: 'text' as const, content: `It was eventually acquired. I was still in high school. It's here because it's where the building started (no that's not me in the video).` },
 ];
 
 const DORITOS_SECTIONS = [
@@ -241,6 +244,70 @@ const PROMISE_WEBSITE_SECTIONS = [
   { type: 'component' as const, componentId: 'promise-website-dashboard', desktopOnly: true },
   { type: 'heading' as const, content: 'Stack' },
   { type: 'text' as const, content: `Next.js, Framer Motion, Tailwind, TypeScript. The dashboard is a self-contained tree embedded in the page.` },
+];
+
+const OPERATOR_SECTIONS = [
+  { type: 'video' as const, content: OPERATOR_WORK_PAGE_VIDEO },
+  {
+    type: 'text' as const,
+    content: `Call center operators work off a dashboard to manage inbound calls — looking up accounts, identifying what the caller needs, navigating to the right action. The goal was to reduce that manual effort without changing the underlying workflow.`,
+  },
+  { type: 'heading' as const, content: 'What changed' },
+  {
+    type: 'text' as const,
+    content: `The dashboard listens to the call. Deepgram's streaming API transcribes the conversation in real time over a WebSocket connection. A custom classification layer built on historical call data maps transcript patterns to likely intents before the operator has to ask.`,
+  },
+  {
+    type: 'text' as const,
+    content: `The primary UI is the live transcript. Predicted intents surface inline. Action buttons render based on what the model thinks is about to be needed. The operator confirms and acts.`,
+  },
+  {
+    type: 'text' as const,
+    content: `If the prediction is wrong, the full dashboard is one click away. The AI layer is additive.`,
+  },
+  { type: 'heading' as const, content: 'Stack' },
+  {
+    type: 'code' as const,
+    content: `// deepgram streaming connection
+const socket = new WebSocket(
+  'wss://api.deepgram.com/v1/listen?model=nova-2&interim_results=true'
+)
+
+socket.onmessage = (event) => {
+  const { transcript, confidence } = JSON.parse(event.data)
+  if (confidence > 0.85) classifyIntent(transcript)
+}`,
+  },
+  {
+    type: 'code' as const,
+    content: `// action buttons driven by predicted intent
+function ActionPanel({ intent }: { intent: Intent }) {
+  const actions = ACTION_MAP[intent.type]
+  return (
+    <div className="action-panel">
+      {actions.map(action => (
+        <button key={action.id} onClick={() => dispatch(action)}>
+          {action.label}
+        </button>
+      ))}
+    </div>
+  )
+}`,
+  },
+  {
+    type: 'code' as const,
+    content: `// intent classification — no llm, deterministic
+function classifyIntent(transcript: string): Intent {
+  for (const [pattern, intent] of INTENT_PATTERNS) {
+    if (pattern.test(transcript)) return intent
+  }
+  return { type: 'unknown', confidence: 0 }
+}`,
+  },
+  {
+    type: 'text' as const,
+    content: `Operators do less searching, callers get faster resolutions. The interface gets out of the way.`,
+  },
 ];
 
 const VISUAL_SYSTEM_HOVER_SECTIONS = [
@@ -594,6 +661,22 @@ export const PROJECT_DETAILS: Record<string, NonNullable<ProjectModalProject>> =
           thumbnail: 'https://cdn.ramintahbaz.com/videos/thumbnails/promise_website_preview.mp4#t=0.01',
           tags: [],
           content: { sections: PROMISE_WEBSITE_SECTIONS },
+        },
+      ];
+    }
+    if (item.id === 'operator') {
+      return [
+        item.id,
+        {
+          id: item.id,
+          title: item.title,
+          category: item.category,
+          description: 'Agent assist dashboard — UI redesign + live AI layer.',
+          year: item.year ?? '2026',
+          thumbnail: OPERATOR_PREVIEW_VIDEO,
+          tags: ['Product', 'Dashboard', 'Deepgram', 'TypeScript'],
+          link: item.href,
+          content: { sections: OPERATOR_SECTIONS },
         },
       ];
     }
@@ -3130,7 +3213,7 @@ const SHOWREEL_VIDEO = 'https://cdn.ramintahbaz.com/videos/preview_intelligent_d
 const SHOWREEL_ANCHOR_ID = 'visual-system-hover'; // desktop: showreel placed to the right of this card
 
 const SHOWREEL_ITEMS = [
-  { id: 'photoboom', title: 'Photo boom', video: 'https://cdn.ramintahbaz.com/videos/photo_boom_video.mp4#t=0.01', href: '/photoboom' },
+  { id: 'photoboom', title: 'Photo boom', video: PHOTOBOOM_PREVIEW_VIDEO, href: '/photoboom' },
   { id: 'ai-document-verification', title: 'Intelligent document review', video: 'https://cdn.ramintahbaz.com/videos/preview_intelligent_document_review.mp4#t=0.01', href: '/products/ai-document-verification' },
   { id: 'co-creator', title: 'Co-creator', video: '/images/co-creator/taste%20%E2%86%92%20system%20demo.mp4', href: '/products/co-creator' },
   { id: 'keycadets', title: 'Keycadets (acquired)', video: '/images/keycadets/248285912_4711445322210021_8637902604872814185_n.MOV', href: '/products/keycadets' },

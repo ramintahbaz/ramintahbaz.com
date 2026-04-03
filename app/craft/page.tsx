@@ -3,6 +3,11 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useLayoutEffect, useRef, useCallback, useState, memo } from 'react';
 import { motion } from 'framer-motion';
+import {
+  CraftMetafizzyMasonry,
+  CRAFT_MASONRY_GUTTER_PX,
+  craftMasonryColumnWidthCss,
+} from '@/components/CraftMetafizzyMasonry';
 import { WORK_ITEMS } from '@/lib/work-items';
 import type { WorkItem } from '@/lib/work-items';
 
@@ -37,56 +42,83 @@ function filterTailExcludedFromFeatured(i: number): boolean {
   return true;
 }
 
-/** FedCaddy + Slice of Pie: same relative order as the rest, but rendered last in the masonry tails */
-const CRAFT_FILM_TO_BOTTOM: number[] = [WORK_ITEMS.findIndex((w) => w.id === 'film-02'), WORK_ITEMS.findIndex((w) => w.id === 'film-04')].filter((i) => i >= 0);
+/** Film + writing cards render after product/interaction in masonry tails (desktop + mobile). */
+const CRAFT_DEPRIORITIZED_INDICES = WORK_ITEMS.map((w, i) =>
+  w.category === 'film' || w.category === 'writing' ? i : -1
+).filter((i) => i >= 0);
 
-const CRAFT_DESKTOP_TAIL_INDICES = (() => {
-  // Indices 0–3 are covered by the fixed desktop row (0, 2, 3, 1); tail starts at 4 to avoid duplicates.
-  const tail = Array.from({ length: WORK_ITEMS.length - 5 }, (_, i) => i + 4);
-  const move = new Set(CRAFT_FILM_TO_BOTTOM);
-  const arr = [...tail.filter((i) => !move.has(i)), ...CRAFT_FILM_TO_BOTTOM.slice().sort((a, b) => a - b)];
-  // Swap ai-document (16) ↔ m8 Commercial (19) in desktop masonry only; all other relative order unchanged.
-  const iDoc = arr.indexOf(16);
-  const iM8 = arr.indexOf(19);
-  if (iDoc >= 0 && iM8 >= 0) {
-    [arr[iDoc], arr[iM8]] = [arr[iM8], arr[iDoc]];
-  }
-  return arr.filter(filterTailExcludedFromFeatured);
-})();
+/** Pinned row after neural + ramin-skill: Operator leads, then Promise site, payment status, Craft. */
+const CRAFT_PINNED_AFTER_NEURAL = (
+  ['operator', 'promise-website', 'payment-status', 'craft'] as const
+)
+  .map((id) => WORK_ITEMS.findIndex((w) => w.id === id))
+  .filter((i) => i >= 0);
 
-/** Index `2` (Promise website) is pinned early in the mobile slot list, not in the tail. */
-const CRAFT_MOBILE_TAIL_BASE = [1, 4, 5, 12, 7, 8, 9, 10, 11, 6, 13, 14, 15, 17, 18, 19, 20, 21] as const;
-const CRAFT_MOBILE_TAIL_INDICES = (() => {
-  const move = new Set(CRAFT_FILM_TO_BOTTOM);
-  return [
-    ...CRAFT_MOBILE_TAIL_BASE.filter(
-      (i) => !move.has(i) && filterTailExcludedFromFeatured(i)
-    ),
-    ...CRAFT_FILM_TO_BOTTOM.slice().sort((a, b) => a - b),
-  ];
-})();
-
-const CRAFT_DESKTOP_PROMISE_IDX = WORK_ITEMS.findIndex((w) => w.id === 'promise-website');
+const CRAFT_AI_DOC_INDEX = WORK_ITEMS.findIndex((w) => w.id === 'ai-document-verification');
 const CRAFT_DESKTOP_M8_IDX = WORK_ITEMS.findIndex((w) => w.id === 'film-03');
 
-/** Desktop: Zeke Sanders story — moved to bottom; Promise website takes its former tail slot (after swap, slot uses m8 index → promise) */
+/** Rendered right after the pinned row (desktop + mobile); excluded from tail so it isn’t duplicated. */
+function filterAiDocFeaturedEarly(i: number): boolean {
+  if (CRAFT_AI_DOC_INDEX >= 0 && i === CRAFT_AI_DOC_INDEX) return false;
+  return true;
+}
+
+const CRAFT_DESKTOP_TAIL_INDICES = (() => {
+  const pinned = new Set(CRAFT_PINNED_AFTER_NEURAL);
+  // Indices 0–3 sit in the pinned row; tail starts at 4 — same length heuristic as before.
+  const tail = Array.from({ length: WORK_ITEMS.length - 5 }, (_, i) => i + 4);
+  const move = new Set(CRAFT_DEPRIORITIZED_INDICES);
+  const arr = [...tail.filter((i) => !move.has(i)), ...CRAFT_DEPRIORITIZED_INDICES.slice().sort((a, b) => a - b)];
+  return arr.filter(
+    (i) => filterTailExcludedFromFeatured(i) && !pinned.has(i) && filterAiDocFeaturedEarly(i)
+  );
+})();
+
+const CRAFT_MOBILE_TAIL_INDICES = (() => {
+  const early = new Set(CRAFT_PINNED_AFTER_NEURAL);
+  const move = new Set(CRAFT_DEPRIORITIZED_INDICES);
+  const rest: number[] = [];
+  for (let i = 0; i < WORK_ITEMS.length; i++) {
+    if (early.has(i)) continue;
+    if (!filterTailExcludedFromFeatured(i)) continue;
+    if (!filterAiDocFeaturedEarly(i)) continue;
+    rest.push(i);
+  }
+  return [...rest.filter((i) => !move.has(i)), ...rest.filter((i) => move.has(i)).sort((a, b) => a - b)];
+})();
+
+/** Desktop: Zeke Sanders story — tail reorder still references m8 slot handling. */
 const CRAFT_FILM05_ZEKE_INDEX = WORK_ITEMS.findIndex((w) => w.id === 'film-05');
 
 type CraftMasonrySlot =
   | { type: 'work'; index: number }
-  | { type: 'neural' };
+  | { type: 'neural' }
+  /** Single masonry cell: Tuesday essay above Thistrackiscrack (avoids horizontalOrder splitting them across columns). */
+  | { type: 'work-stack'; indices: readonly [number, number] };
 
-/** Desktop only: exchange Promise website and m8 Commercial masonry positions (work slots only; neural passes through). */
-function swapPromiseM8DesktopSlots(slots: CraftMasonrySlot[]): CraftMasonrySlot[] {
-  const a = CRAFT_DESKTOP_PROMISE_IDX;
-  const b = CRAFT_DESKTOP_M8_IDX;
-  if (a < 0 || b < 0) return slots;
-  return slots.map((s) => {
-    if (s.type !== 'work') return s;
-    if (s.index === a) return { type: 'work' as const, index: b };
-    if (s.index === b) return { type: 'work' as const, index: a };
-    return s;
-  });
+function craftTuesdayThistrackStackSlots(): CraftMasonrySlot[] {
+  const t = CRAFT_ESSAY03_TUESDAY_INDEX;
+  const tr = CRAFT_THISTRACKISCRACK_INDEX;
+  if (t >= 0 && tr >= 0) return [{ type: 'work-stack', indices: [t, tr] as const }];
+  const out: CraftMasonrySlot[] = [];
+  if (t >= 0) out.push({ type: 'work', index: t });
+  if (tr >= 0) out.push({ type: 'work', index: tr });
+  return out;
+}
+
+function craftSlotLayoutSignature(slots: CraftMasonrySlot[]): string {
+  return slots
+    .map((s) => {
+      if (s.type === 'neural') return 'neural';
+      if (s.type === 'work-stack')
+        return `stack:${s.indices.map((i) => WORK_ITEMS[i]?.id ?? `i${i}`).join('+')}`;
+      return WORK_ITEMS[s.index]?.id ?? `i${s.index}`;
+    })
+    .join('|');
+}
+
+function craftMasonrySlotGridSpan(slot: CraftMasonrySlot): number {
+  return slot.type === 'work-stack' ? 2 : 1;
 }
 
 /**
@@ -169,11 +201,14 @@ function NeuralPreviewCard({
   dimmed,
   hideWhenFiltered,
   isMobile,
+  packInMasonry,
 }: {
   onNavigate: () => void;
   dimmed?: boolean;
   hideWhenFiltered?: boolean;
   isMobile: boolean;
+  /** Metafizzy Masonry: outer wrapper owns vertical gap. */
+  packInMasonry?: boolean;
 }) {
   const cardRef = useRef<HTMLAnchorElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -213,10 +248,10 @@ function NeuralPreviewCard({
         onNavigate();
       }}
       style={{
-        display: hideWhenFiltered ? 'none' : 'inline-block',
+        display: hideWhenFiltered ? 'none' : 'block',
         width: '100%',
-        marginBottom: '12px',
-        breakInside: 'avoid',
+        marginBottom: packInMasonry ? 0 : '12px',
+        breakInside: packInMasonry ? undefined : 'avoid',
         borderRadius: '12px',
         overflow: 'hidden',
         position: 'relative',
@@ -346,6 +381,7 @@ const MasonryCard = memo(function MasonryCard({
   hideWhenFiltered,
   isMobile,
   gridIndex,
+  packInMasonry,
 }: {
   item: WorkItem;
   onNavigate: () => void;
@@ -353,6 +389,7 @@ const MasonryCard = memo(function MasonryCard({
   hideWhenFiltered?: boolean;
   isMobile: boolean;
   gridIndex: number;
+  packInMasonry?: boolean;
 }) {
   const cardRef = useRef<HTMLAnchorElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -363,6 +400,10 @@ const MasonryCard = memo(function MasonryCard({
   const hasVideo = !!item.video;
   /** Strip #fragment so we can append `#t=` for start time without duplicating fragments from data URLs. */
   const videoBase = item.video ? item.video.split('#')[0] : '';
+  const masonryVideoSrc =
+    item.videoOmitSeekFragment || !item.video
+      ? videoBase
+      : `${videoBase}#t=${(item.videoStart ?? 0) === 0 ? 0.01 : item.videoStart}`;
   const cardImage = item.cardImage;
   const useImageOnCard = !!cardImage;
   const eagerVideo = gridIndex < 6;
@@ -394,7 +435,7 @@ const MasonryCard = memo(function MasonryCard({
               if (!e.isIntersecting) continue;
               const video = videoRef.current;
               if (!srcSetRef.current && video && item.video) {
-                video.src = `${videoBase}#t=${(item.videoStart ?? 0) === 0 ? 0.01 : item.videoStart}`;
+                video.src = masonryVideoSrc;
                 srcSetRef.current = true;
               }
               io1?.disconnect();
@@ -454,7 +495,7 @@ const MasonryCard = memo(function MasonryCard({
         }
       }
     };
-  }, [hasVideo, gridIndex, eagerVideo, item.video, item.videoStart, tryPlayIfAppropriate]);
+  }, [hasVideo, gridIndex, eagerVideo, item.video, item.videoStart, item.videoOmitSeekFragment, masonryVideoSrc, tryPlayIfAppropriate]);
 
   const year = item.year ?? '';
   const cardFrameAspect = item.cardAspectRatio ?? '4/3';
@@ -469,10 +510,10 @@ const MasonryCard = memo(function MasonryCard({
         onNavigate();
       }}
       style={{
-        display: hideWhenFiltered ? 'none' : 'inline-block',
+        display: hideWhenFiltered ? 'none' : 'block',
         width: '100%',
-        marginBottom: '12px',
-        breakInside: 'avoid',
+        marginBottom: packInMasonry ? 0 : '12px',
+        breakInside: packInMasonry ? undefined : 'avoid',
         borderRadius: '12px',
         overflow: 'hidden',
         position: 'relative',
@@ -523,11 +564,7 @@ const MasonryCard = memo(function MasonryCard({
         >
           <video
             ref={videoRef}
-            src={
-              eagerVideo && item.video
-                ? `${videoBase}#t=${(item.videoStart ?? 0) === 0 ? 0.01 : item.videoStart}`
-                : undefined
-            }
+            src={eagerVideo && item.video ? masonryVideoSrc : undefined}
             autoPlay
             muted
             loop={item.videoLoopSec == null}
@@ -725,6 +762,132 @@ export default function CraftPage() {
     setFilter((prev) => (prev === value ? 'all' : value));
   }, []);
 
+  const mobileSlots: CraftMasonrySlot[] = [
+    ...(CRAFT_PROMISE_CONSOLE_INDEX >= 0
+      ? [{ type: 'work' as const, index: CRAFT_PROMISE_CONSOLE_INDEX }]
+      : []),
+    ...(CRAFT_NACHA_INDEX >= 0 ? [{ type: 'work' as const, index: CRAFT_NACHA_INDEX }] : []),
+    { type: 'neural' as const },
+    ...(CRAFT_RAMIN_SKILL_INDEX >= 0 ? [{ type: 'work' as const, index: CRAFT_RAMIN_SKILL_INDEX }] : []),
+    ...CRAFT_PINNED_AFTER_NEURAL.map((index) => ({ type: 'work' as const, index })),
+    ...(CRAFT_AI_DOC_INDEX >= 0 ? [{ type: 'work' as const, index: CRAFT_AI_DOC_INDEX }] : []),
+    ...CRAFT_MOBILE_TAIL_INDICES.map((index) => ({ type: 'work' as const, index })),
+    ...(CRAFT_DORITOS_INDEX >= 0 ? [{ type: 'work' as const, index: CRAFT_DORITOS_INDEX }] : []),
+    ...craftTuesdayThistrackStackSlots(),
+  ];
+
+  const desktopSlotsOrdered: CraftMasonrySlot[] = [
+    ...(CRAFT_PROMISE_CONSOLE_INDEX >= 0
+      ? [{ type: 'work' as const, index: CRAFT_PROMISE_CONSOLE_INDEX }]
+      : []),
+    ...(CRAFT_NACHA_INDEX >= 0 ? [{ type: 'work' as const, index: CRAFT_NACHA_INDEX }] : []),
+    { type: 'neural' as const },
+    ...(CRAFT_RAMIN_SKILL_INDEX >= 0 ? [{ type: 'work' as const, index: CRAFT_RAMIN_SKILL_INDEX }] : []),
+    ...CRAFT_PINNED_AFTER_NEURAL.map((index) => ({ type: 'work' as const, index })),
+    ...(CRAFT_AI_DOC_INDEX >= 0 ? [{ type: 'work' as const, index: CRAFT_AI_DOC_INDEX }] : []),
+    ...reorderDesktopTailPromiseWebsiteWithZeke(CRAFT_DESKTOP_TAIL_INDICES).map((index) => ({
+      type: 'work' as const,
+      index,
+    })),
+    ...(CRAFT_DORITOS_INDEX >= 0 ? [{ type: 'work' as const, index: CRAFT_DORITOS_INDEX }] : []),
+    ...(CRAFT_FILM05_ZEKE_INDEX >= 0 ? [{ type: 'work' as const, index: CRAFT_FILM05_ZEKE_INDEX }] : []),
+    ...craftTuesdayThistrackStackSlots(),
+  ];
+
+  const masonryColumnCount = isMobile ? 1 : 3;
+  const masonryItemWidthCss = craftMasonryColumnWidthCss(masonryColumnCount);
+
+  const mobileMasonryKey = `${filter}::${craftSlotLayoutSignature(mobileSlots)}`;
+  const desktopMasonryKey = `${filter}::${craftSlotLayoutSignature(desktopSlotsOrdered)}`;
+
+  const renderMasonrySlot = (slot: CraftMasonrySlot, gridIndex: number) => {
+    if (slot.type === 'work-stack') {
+      const [iTop, iBottom] = slot.indices;
+      const topItem = WORK_ITEMS[iTop];
+      const bottomItem = WORK_ITEMS[iBottom];
+      if (!topItem || !bottomItem) return null;
+      return (
+        <div
+          key="tuesday-thistrack-stack"
+          className="craft-masonry-item"
+          style={{ width: masonryItemWidthCss, marginBottom: 12 }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: CRAFT_MASONRY_GUTTER_PX,
+              width: '100%',
+            }}
+          >
+            <MasonryCard
+              item={topItem}
+              onNavigate={() => handleCardClick(topItem)}
+              dimmed={filter !== 'all' && topItem.category !== filter}
+              hideWhenFiltered={filter !== 'all' && topItem.category !== filter}
+              isMobile={isMobile}
+              gridIndex={gridIndex}
+              packInMasonry
+            />
+            <MasonryCard
+              item={bottomItem}
+              onNavigate={() => handleCardClick(bottomItem)}
+              dimmed={filter !== 'all' && bottomItem.category !== filter}
+              hideWhenFiltered={filter !== 'all' && bottomItem.category !== filter}
+              isMobile={isMobile}
+              gridIndex={gridIndex + 1}
+              packInMasonry
+            />
+          </div>
+        </div>
+      );
+    }
+
+    const reactKey =
+      slot.type === 'neural' ? 'neural-preview' : WORK_ITEMS[slot.index]?.id ?? `slot-${gridIndex}`;
+    const inner =
+      slot.type === 'neural' ? (
+        <NeuralPreviewCard
+          onNavigate={handleNeuralPreviewClick}
+          dimmed={filter !== 'all' && filter !== 'interaction'}
+          hideWhenFiltered={filter !== 'all' && filter !== 'interaction'}
+          isMobile={isMobile}
+          packInMasonry
+        />
+      ) : WORK_ITEMS[slot.index] ? (
+        <MasonryCard
+          item={WORK_ITEMS[slot.index]}
+          onNavigate={() => handleCardClick(WORK_ITEMS[slot.index]!)}
+          dimmed={filter !== 'all' && WORK_ITEMS[slot.index].category !== filter}
+          hideWhenFiltered={filter !== 'all' && WORK_ITEMS[slot.index].category !== filter}
+          isMobile={isMobile}
+          gridIndex={gridIndex}
+          packInMasonry
+        />
+      ) : null;
+
+    if (!inner) return null;
+
+    return (
+      <div
+        key={reactKey}
+        className="craft-masonry-item"
+        style={{ width: masonryItemWidthCss, marginBottom: 12 }}
+      >
+        {inner}
+      </div>
+    );
+  };
+
+  const mapSlotsWithGridIndex = (slots: CraftMasonrySlot[]) => {
+    let g = 0;
+    return slots.map((slot) => {
+      const el = renderMasonrySlot(slot, g);
+      g += craftMasonrySlotGridSpan(slot);
+      return el;
+    });
+  };
+
   return (
     <>
       <style>{`
@@ -798,90 +961,29 @@ export default function CraftPage() {
                 );
               })}
         </div>
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.4, ease: 'easeOut' }}
-          style={{
-            columns: isMobile ? 1 : 3,
-            columnGap: '12px',
-            padding: '72px 24px 24px',
-          }}
-        >
-          {(isMobile
-            ? [
-                ...(CRAFT_PROMISE_CONSOLE_INDEX >= 0
-                  ? [{ type: 'work' as const, index: CRAFT_PROMISE_CONSOLE_INDEX }]
-                  : []),
-                ...(CRAFT_NACHA_INDEX >= 0 ? [{ type: 'work' as const, index: CRAFT_NACHA_INDEX }] : []),
-                { type: 'neural' as const },
-                ...(CRAFT_RAMIN_SKILL_INDEX >= 0
-                  ? [{ type: 'work' as const, index: CRAFT_RAMIN_SKILL_INDEX }]
-                  : []),
-                { type: 'work' as const, index: 0 },
-                { type: 'work' as const, index: 2 },
-                { type: 'work' as const, index: 16 },
-                { type: 'work' as const, index: 3 },
-                ...CRAFT_MOBILE_TAIL_INDICES.map((index) => ({
-                  type: 'work' as const,
-                  index,
-                })),
-                ...(CRAFT_DORITOS_INDEX >= 0 ? [{ type: 'work' as const, index: CRAFT_DORITOS_INDEX }] : []),
-                ...(CRAFT_ESSAY03_TUESDAY_INDEX >= 0
-                  ? [{ type: 'work' as const, index: CRAFT_ESSAY03_TUESDAY_INDEX }]
-                  : []),
-                ...(CRAFT_THISTRACKISCRACK_INDEX >= 0
-                  ? [{ type: 'work' as const, index: CRAFT_THISTRACKISCRACK_INDEX }]
-                  : []),
-              ]
-            : swapPromiseM8DesktopSlots([
-                ...(CRAFT_PROMISE_CONSOLE_INDEX >= 0
-                  ? [{ type: 'work' as const, index: CRAFT_PROMISE_CONSOLE_INDEX }]
-                  : []),
-                ...(CRAFT_NACHA_INDEX >= 0 ? [{ type: 'work' as const, index: CRAFT_NACHA_INDEX }] : []),
-                { type: 'neural' as const },
-                ...(CRAFT_RAMIN_SKILL_INDEX >= 0
-                  ? [{ type: 'work' as const, index: CRAFT_RAMIN_SKILL_INDEX }]
-                  : []),
-                { type: 'work' as const, index: 0 },
-                { type: 'work' as const, index: 2 },
-                { type: 'work' as const, index: 3 },
-                { type: 'work' as const, index: 1 },
-                ...reorderDesktopTailPromiseWebsiteWithZeke(CRAFT_DESKTOP_TAIL_INDICES).map((index) => ({
-                  type: 'work' as const,
-                  index,
-                })),
-                ...(CRAFT_DORITOS_INDEX >= 0 ? [{ type: 'work' as const, index: CRAFT_DORITOS_INDEX }] : []),
-                ...(CRAFT_FILM05_ZEKE_INDEX >= 0 ? [{ type: 'work' as const, index: CRAFT_FILM05_ZEKE_INDEX }] : []),
-                ...(CRAFT_ESSAY03_TUESDAY_INDEX >= 0
-                  ? [{ type: 'work' as const, index: CRAFT_ESSAY03_TUESDAY_INDEX }]
-                  : []),
-                ...(CRAFT_THISTRACKISCRACK_INDEX >= 0
-                  ? [{ type: 'work' as const, index: CRAFT_THISTRACKISCRACK_INDEX }]
-                  : []),
-              ])
-          ).map((slot, gridIndex) =>
-            slot.type === 'neural' ? (
-              <NeuralPreviewCard
-                key="neural-preview"
-                onNavigate={handleNeuralPreviewClick}
-                dimmed={filter !== 'all' && filter !== 'interaction'}
-                hideWhenFiltered={filter !== 'all' && filter !== 'interaction'}
-                isMobile={isMobile}
-              />
-            ) : WORK_ITEMS[slot.index] ? (
-              <MasonryCard
-                key={`craft-${gridIndex}-${WORK_ITEMS[slot.index].id}`}
-                item={WORK_ITEMS[slot.index]}
-                onNavigate={() => handleCardClick(WORK_ITEMS[slot.index]!)}
-                dimmed={filter !== 'all' && WORK_ITEMS[slot.index].category !== filter}
-                hideWhenFiltered={filter !== 'all' && WORK_ITEMS[slot.index].category !== filter}
-                isMobile={isMobile}
-                gridIndex={gridIndex}
-              />
-            ) : null
-          )}
-        </motion.div>
+        {isMobile ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
+            style={{ padding: '72px 24px 24px' }}
+          >
+            <CraftMetafizzyMasonry layoutKey={mobileMasonryKey} columnCount={1}>
+              {mapSlotsWithGridIndex(mobileSlots)}
+            </CraftMetafizzyMasonry>
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
+            style={{ padding: '72px 24px 24px' }}
+          >
+            <CraftMetafizzyMasonry layoutKey={desktopMasonryKey} columnCount={3}>
+              {mapSlotsWithGridIndex(desktopSlotsOrdered)}
+            </CraftMetafizzyMasonry>
+          </motion.div>
+        )}
       </div>
     </>
   );

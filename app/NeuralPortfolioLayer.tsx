@@ -34,6 +34,16 @@ export default function NeuralPortfolioLayer() {
   const isExplicitNeuralView = searchParams.get('view') === 'neural';
   const splashMode = pathname === '/' && !splashDone;
 
+  /**
+   * Mobile home after splash is craft/masonry only (`/` aliases `/craft`). Do not keep NeuralPortfolio mounted
+   * full-screen at z-index 0 — it bleeds through the translucent TopBar in the `pt-12` band above `#main-scroll`.
+   * Mount when: explicit `?view=neural`, or mobile splash (pre-grid). Desktop: same as before (`?view=neural` only).
+   */
+  const renderNeuralPortfolio =
+    showLayer &&
+    pastFirstFrame &&
+    (isExplicitNeuralView || (isMobile && isSplashMode));
+
   return (
     <div
       style={{
@@ -41,11 +51,12 @@ export default function NeuralPortfolioLayer() {
         inset: 0,
         zIndex: showLayer && isExplicitNeuralView ? 2 : 0,
         display: showLayer ? 'block' : 'none',
+        pointerEvents: renderNeuralPortfolio ? 'auto' : 'none',
       }}
     >
-      {(showLayer && pastFirstFrame) && (isMobile || isExplicitNeuralView) && (
+      {renderNeuralPortfolio ? (
         <NeuralPortfolio isLayerVisible={showLayer} splashMode={splashMode} />
-      )}
+      ) : null}
     </div>
   );
 }

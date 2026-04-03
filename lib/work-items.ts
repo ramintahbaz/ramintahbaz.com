@@ -11,6 +11,8 @@ export interface WorkItem {
   thumbnail: string;
   video?: string;
   cardImage?: string;
+  /** If true, craft masonry uses `video` URL as-is (no `#t=` seek fragment). */
+  videoOmitSeekFragment?: boolean;
   videoStart?: number;
   videoLoopSec?: number;
   videoFullLoop?: boolean;
@@ -38,7 +40,20 @@ export const PROMISE_CONSOLE_WORK_PAGE_VIDEO =
   'https://cdn.ramintahbaz.com/videos/Promise_Console_new.mp4#t=0.01';
 
 /** Craft masonry / grid card — lighter clip; hero on the work page uses `PROMISE_WEBSITE_DEMO_VIDEO`. */
-export const PROMISE_WEBSITE_MASONRY_VIDEO = 'https://cdn.ramintahbaz.com/videos/thumbnails/promise_website_demo_1.mp4#t=0.01';
+export const PROMISE_WEBSITE_MASONRY_VIDEO =
+  'https://cdn.ramintahbaz.com/videos/preview_promisewebsite.mp4';
+
+/** Masonry / neural card preview for Photo boom. */
+export const PHOTOBOOM_PREVIEW_VIDEO =
+  'https://cdn.ramintahbaz.com/videos/preview_photoboom.mp4';
+
+/** Craft / neural card preview for Operator. */
+export const OPERATOR_PREVIEW_VIDEO =
+  'https://cdn.ramintahbaz.com/videos/preview_promisepay.mp4';
+
+/** Lead video on `/products/operator` only. Bump `?v=` when replacing file at same path; remove when stable. */
+export const OPERATOR_WORK_PAGE_VIDEO =
+  'https://cdn.ramintahbaz.com/videos/promisepay.mp4?v=2';
 
 /** Masonry + card thumbnail for Disbursement ledger. */
 export const NACHA_PREVIEW_VIDEO = 'https://cdn.ramintahbaz.com/videos/nacha_preview.mp4#t=0.01';
@@ -82,11 +97,24 @@ export const WORK_ITEMS: WorkItem[] = [
     excerpt: 'A coded redesign of Promise\'s marketing site. An unreleased direction.',
   },
   {
+    id: 'operator',
+    title: 'Operator',
+    category: 'product',
+    thumbnail: '',
+    video: OPERATOR_PREVIEW_VIDEO,
+    cardAspectRatio: '16/9',
+    href: '/products/operator',
+    excerpt:
+      'Agent assist dashboard — live call transcription, predicted intents inline, and action shortcuts. The AI layer stays additive.',
+    year: 'April 2026',
+  },
+  {
     id: 'photoboom',
     title: 'Photo boom',
     category: 'interaction',
     thumbnail: '',
-    video: 'https://cdn.ramintahbaz.com/videos/photo_boom_video.mp4#t=0.01',
+    video: PHOTOBOOM_PREVIEW_VIDEO,
+    videoOmitSeekFragment: true,
     cardAspectRatio: '3/4',
     videoObjectPosition: 'center top',
     href: '/photoboom',

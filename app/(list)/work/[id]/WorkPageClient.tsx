@@ -41,7 +41,9 @@ export function WorkPageClient({ id }: WorkPageClientProps) {
         background: '#161616',
         minHeight: '100dvh',
         color: 'rgba(255,255,255,0.85)',
-        padding: '0 0 80px',
+        padding: isDesktop
+          ? '0 0 80px'
+          : '0 0 max(104px, calc(80px + env(safe-area-inset-bottom, 0px)))',
       }}
     >
       <div
@@ -118,6 +120,57 @@ export function WorkPageClient({ id }: WorkPageClientProps) {
         {/* Right gutter — empty */}
         <div className="gutter-col" />
       </div>
+
+      {!isDesktop ? (
+        <div
+          style={{
+            position: 'fixed',
+            left: '50%',
+            bottom: 'max(24px, env(safe-area-inset-bottom, 0px))',
+            transform: 'translateX(-50%)',
+            zIndex: 50,
+            pointerEvents: 'auto',
+          }}
+        >
+          <motion.button
+            type="button"
+            aria-label="Back to craft"
+            onClick={() => router.push('/craft', { scroll: false })}
+            whileTap={{ scale: 0.9, opacity: 0.82 }}
+            transition={{ type: 'spring', stiffness: 520, damping: 28, mass: 0.12 }}
+            style={{
+              width: 46,
+              height: 46,
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: 0,
+              padding: 0,
+              cursor: 'pointer',
+              touchAction: 'manipulation',
+              WebkitTapHighlightColor: 'transparent',
+              color: '#fff',
+              background: '#111',
+              border: '1px solid #1A1A1A',
+              boxShadow: 'none',
+            }}
+          >
+            <svg
+              width={20}
+              height={20}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              aria-hidden
+            >
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </motion.button>
+        </div>
+      ) : null}
     </motion.div>
   );
 }
