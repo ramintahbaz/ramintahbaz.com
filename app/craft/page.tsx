@@ -13,7 +13,10 @@ import type { WorkItem } from '@/lib/work-items';
 
 type FilterValue = 'all' | WorkItem['category'];
 
-/** Last in WORK_ITEMS; craft renders this card first without renumbering other indices */
+/** Rendered after neural preview, before ramin-skill; excluded from tail */
+const CRAFT_SPATIAL_GLASS_INDEX = WORK_ITEMS.findIndex((w) => w.id === 'spatial-glass');
+
+/** Last in WORK_ITEMS; craft renders design engineer skill early without renumbering other indices */
 const CRAFT_RAMIN_SKILL_INDEX = WORK_ITEMS.findIndex((w) => w.id === 'ramin-skill');
 
 /** Featured early in masonry; excluded from tail so it doesn’t render twice */
@@ -35,6 +38,7 @@ const CRAFT_ESSAY03_TUESDAY_INDEX = WORK_ITEMS.findIndex((w) => w.id === 'essay-
 function filterTailExcludedFromFeatured(i: number): boolean {
   if (CRAFT_PROMISE_CONSOLE_INDEX >= 0 && i === CRAFT_PROMISE_CONSOLE_INDEX) return false;
   if (CRAFT_NACHA_INDEX >= 0 && i === CRAFT_NACHA_INDEX) return false;
+  if (CRAFT_SPATIAL_GLASS_INDEX >= 0 && i === CRAFT_SPATIAL_GLASS_INDEX) return false;
   if (CRAFT_RAMIN_SKILL_INDEX >= 0 && i === CRAFT_RAMIN_SKILL_INDEX) return false;
   if (CRAFT_THISTRACKISCRACK_INDEX >= 0 && i === CRAFT_THISTRACKISCRACK_INDEX) return false;
   if (CRAFT_DORITOS_INDEX >= 0 && i === CRAFT_DORITOS_INDEX) return false;
@@ -47,7 +51,7 @@ const CRAFT_DEPRIORITIZED_INDICES = WORK_ITEMS.map((w, i) =>
   w.category === 'film' || w.category === 'writing' ? i : -1
 ).filter((i) => i >= 0);
 
-/** Pinned row after neural + ramin-skill: Operator leads, then Promise site, payment status, Craft. */
+/** Pinned row after neural + spatial-glass + ramin-skill: Operator leads, then Promise site, payment status, Craft. */
 const CRAFT_PINNED_AFTER_NEURAL = (
   ['operator', 'promise-website', 'payment-status', 'craft'] as const
 )
@@ -65,8 +69,8 @@ function filterAiDocFeaturedEarly(i: number): boolean {
 
 const CRAFT_DESKTOP_TAIL_INDICES = (() => {
   const pinned = new Set(CRAFT_PINNED_AFTER_NEURAL);
-  // Indices 0–3 sit in the pinned row; tail starts at 4 — same length heuristic as before.
-  const tail = Array.from({ length: WORK_ITEMS.length - 5 }, (_, i) => i + 4);
+  // Tail is indices 4 … WORK_ITEMS.length - 1 (length - 4 entries). −5 dropped the last item from masonry.
+  const tail = Array.from({ length: WORK_ITEMS.length - 4 }, (_, i) => i + 4);
   const move = new Set(CRAFT_DEPRIORITIZED_INDICES);
   const arr = [...tail.filter((i) => !move.has(i)), ...CRAFT_DEPRIORITIZED_INDICES.slice().sort((a, b) => a - b)];
   return arr.filter(
@@ -768,6 +772,7 @@ export default function CraftPage() {
       : []),
     ...(CRAFT_NACHA_INDEX >= 0 ? [{ type: 'work' as const, index: CRAFT_NACHA_INDEX }] : []),
     { type: 'neural' as const },
+    ...(CRAFT_SPATIAL_GLASS_INDEX >= 0 ? [{ type: 'work' as const, index: CRAFT_SPATIAL_GLASS_INDEX }] : []),
     ...(CRAFT_RAMIN_SKILL_INDEX >= 0 ? [{ type: 'work' as const, index: CRAFT_RAMIN_SKILL_INDEX }] : []),
     ...CRAFT_PINNED_AFTER_NEURAL.map((index) => ({ type: 'work' as const, index })),
     ...(CRAFT_AI_DOC_INDEX >= 0 ? [{ type: 'work' as const, index: CRAFT_AI_DOC_INDEX }] : []),
@@ -782,6 +787,7 @@ export default function CraftPage() {
       : []),
     ...(CRAFT_NACHA_INDEX >= 0 ? [{ type: 'work' as const, index: CRAFT_NACHA_INDEX }] : []),
     { type: 'neural' as const },
+    ...(CRAFT_SPATIAL_GLASS_INDEX >= 0 ? [{ type: 'work' as const, index: CRAFT_SPATIAL_GLASS_INDEX }] : []),
     ...(CRAFT_RAMIN_SKILL_INDEX >= 0 ? [{ type: 'work' as const, index: CRAFT_RAMIN_SKILL_INDEX }] : []),
     ...CRAFT_PINNED_AFTER_NEURAL.map((index) => ({ type: 'work' as const, index })),
     ...(CRAFT_AI_DOC_INDEX >= 0 ? [{ type: 'work' as const, index: CRAFT_AI_DOC_INDEX }] : []),

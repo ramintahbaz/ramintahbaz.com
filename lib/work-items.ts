@@ -55,6 +55,10 @@ export const OPERATOR_PREVIEW_VIDEO =
 export const OPERATOR_WORK_PAGE_VIDEO =
   'https://cdn.ramintahbaz.com/videos/promisepay.mp4?v=2';
 
+/** Craft / neural card + work page hero for Spatial glass. */
+export const SPATIAL_GLASS_VIDEO =
+  'https://cdn.ramintahbaz.com/videos/spatialglass.mp4#t=0.01';
+
 /** Masonry + card thumbnail for Disbursement ledger. */
 export const NACHA_PREVIEW_VIDEO = 'https://cdn.ramintahbaz.com/videos/nacha_preview.mp4#t=0.01';
 
@@ -361,5 +365,17 @@ export const WORK_ITEMS: WorkItem[] = [
     video: NACHA_PREVIEW_VIDEO,
     thumbnail: NACHA_PREVIEW_VIDEO,
     cardAspectRatio: '4/3',
+  },
+  {
+    id: 'spatial-glass',
+    title: 'Spatial glass',
+    category: 'product' as const,
+    thumbnail: '',
+    video: SPATIAL_GLASS_VIDEO,
+    cardAspectRatio: '3/4',
+    videoObjectPosition: 'center top',
+    href: '/products/spatial-glass',
+    excerpt: 'Camera passthrough and text punch-through for a more spatial interface on iOS.',
+    year: 'March 2026',
   },
 ];

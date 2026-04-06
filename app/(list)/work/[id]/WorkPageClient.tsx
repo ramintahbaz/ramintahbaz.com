@@ -114,7 +114,7 @@ export function WorkPageClient({ id }: WorkPageClientProps) {
           }}>
             {project.title}
           </h1>
-          <WorkPageSections sections={project.content?.sections ?? []} />
+          <WorkPageSections sections={project.content?.sections ?? []} projectId={id} />
         </div>
 
         {/* Right gutter — empty */}

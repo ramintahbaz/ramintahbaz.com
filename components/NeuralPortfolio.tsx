@@ -18,6 +18,7 @@ import {
   PHOTOBOOM_PREVIEW_VIDEO,
   OPERATOR_PREVIEW_VIDEO,
   OPERATOR_WORK_PAGE_VIDEO,
+  SPATIAL_GLASS_VIDEO,
   type WorkItem,
 } from '@/lib/work-items';
 
@@ -1040,6 +1041,32 @@ function applyBlockingFactor(lines: string[]): string[] {
 
   return returns;
 }`,
+              },
+            ],
+          },
+        },
+      ];
+    }
+    if (item.id === 'spatial-glass') {
+      return [
+        item.id,
+        {
+          id: item.id,
+          title: item.title,
+          category: item.category,
+          description:
+            'Camera passthrough and text punch-through for a spatial interface on iOS.',
+          year: 'March 2026',
+          thumbnail: item.thumbnail,
+          tags: [],
+          link: item.href,
+          content: {
+            sections: [
+              { type: 'video', content: SPATIAL_GLASS_VIDEO },
+              {
+                type: 'text',
+                content:
+                  'An experiment exploring camera passthrough to create a more spatial interface on iOS, using text punch-through effects.',
               },
             ],
           },

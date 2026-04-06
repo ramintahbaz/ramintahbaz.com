@@ -108,6 +108,8 @@ export function FilmEmbed({ src, isVimeo }: { src: string; isVimeo: boolean }) {
 
 interface WorkPageSectionsProps {
   sections: WorkPageSection[];
+  /** Work page id — used for per-project video stage styling (letterboxing vs page bg). */
+  projectId?: string;
 }
 
 function CopyCodeButton({ text }: { text: string }) {
@@ -166,7 +168,7 @@ function CopyCodeButton({ text }: { text: string }) {
   );
 }
 
-export function WorkPageSections({ sections }: WorkPageSectionsProps) {
+export function WorkPageSections({ sections, projectId }: WorkPageSectionsProps) {
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
     const check = () => setIsMobile(typeof window !== 'undefined' && window.innerWidth < 768);
@@ -219,6 +221,12 @@ export function WorkPageSections({ sections }: WorkPageSectionsProps) {
         if (section.type === 'video' && section.content) {
           const raw = section.content;
           const src = raw.includes('#') ? raw : `${raw}#t=0.01`;
+          const videoStageBg =
+            projectId === 'spatial-glass' ? '#161616' : '#0a0a0a';
+          const videoStageBorder =
+            projectId === 'spatial-glass'
+              ? 'none'
+              : '1px solid rgba(255,255,255,0.08)';
           return (
             <div
               key={i}
@@ -226,10 +234,10 @@ export function WorkPageSections({ sections }: WorkPageSectionsProps) {
                 margin: '0 0 28px',
                 borderRadius: 10,
                 overflow: 'hidden',
-                background: '#0a0a0a',
+                background: videoStageBg,
                 aspectRatio: '1',
                 position: 'relative',
-                border: '1px solid rgba(255,255,255,0.08)',
+                border: videoStageBorder,
                 ...firstSectionNoTop,
               }}
             >
