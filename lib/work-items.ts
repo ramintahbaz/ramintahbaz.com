@@ -296,7 +296,7 @@ export const WORK_ITEMS: WorkItem[] = [
   },
   {
     id: 'film-03',
-    title: 'M8 commercial',
+    title: 'm8 commercial',
     category: 'film',
     thumbnail: '/thumbnails/film-03.jpg',
     video: 'https://cdn.ramintahbaz.com/videos/m8_video_preview.mp4#t=0.01',
